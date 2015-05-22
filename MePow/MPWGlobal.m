@@ -20,6 +20,6 @@ static MPWGlobal *sharedInstance = nil;
         }
     }
     return sharedInstance;
-
 }
+
 @end

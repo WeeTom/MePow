@@ -15,4 +15,6 @@
     #import <Bolts/Bolts.h>
     #import <ParseUI/ParseUI.h>
     #import "MPWGlobal.h"
+    #import "HHKit.h"
+    #import "MRProgress.h"
 #endif

@@ -16,23 +16,14 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
-    
-    [UIView animateKeyframesWithDuration:0 delay:0 options:0 animations:^{
-        
-    } completion:^(BOOL finished) {
-        
-    }];
     [Parse enableLocalDatastore];
     NSDictionary *configuration = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Configuration" ofType:@"plist"]];
-    // Initialize Parse.
+
     [Parse setApplicationId:configuration[@"ParseAppID"]
                   clientKey:configuration[@"ParseClientKey"]];
     
-    // [Optional] Track statistics around application opens.
     [PFAnalytics trackAppOpenedWithLaunchOptions:launchOptions];
 
-    // Register for Push Notitications
     [self registerPushService];
     return YES;
 }

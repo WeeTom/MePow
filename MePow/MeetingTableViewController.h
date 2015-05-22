@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+extern NSString *MeetingTableViewControllerDidDeleteMeeting;
+
 @interface MeetingTableViewController : UITableViewController
 @property (strong, nonatomic) PFObject *meeting;
 @end

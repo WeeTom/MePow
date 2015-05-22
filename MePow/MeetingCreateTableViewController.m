@@ -11,6 +11,8 @@
 #import "NSString+HHKit.h"
 #import "MRProgress.h"
 
+NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCreateTableViewControllerDidFinishCreatingMeeting";
+
 @interface MeetingCreateTableViewController () <UITextFieldDelegate>
 @property (assign, nonatomic) int viewAppearTime, duration;
 @property (strong, nonatomic) NSMutableArray *users;
@@ -251,25 +253,18 @@
         return;
     }
     
-    MRProgressOverlayView *progressView = [MRProgressOverlayView showOverlayAddedTo:self.view animated:YES];
-    [progressView show:YES];
-    
     PFObject *meeting = [PFObject objectWithClassName:@"Meeting"];
+    meeting[@"creator"] = [PFUser currentUser].objectId;
     meeting[@"name"] = self.name.text;
     if (self.location.text.trim.length > 0) {
         meeting[@"location"] = self.location.text;
     }
     meeting[@"begin"] = @([self.picker.date timeIntervalSince1970]);
     meeting[@"duration"] = @(self.duration);
-    if ([meeting pin]) {
-        progressView.mode = MRProgressOverlayViewModeCheckmark;
-        progressView.titleLabelText = @"Saved";
-        [progressView performSelector:@selector(dismiss:) withObject:@YES afterDelay:1];
-    } else {
-        progressView.mode = MRProgressOverlayViewModeCross;
-        progressView.titleLabelText = @"Failed";
-        [progressView performSelector:@selector(dismiss:) withObject:@YES afterDelay:1];
-    }
+    [meeting pin];
+    [meeting saveEventually];
+    [[NSNotificationCenter defaultCenter] postNotificationName:MeetingCreateTableViewControllerDidFinishCreatingMeeting object:meeting];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (IBAction)stepperValueChanged:(id)sender {

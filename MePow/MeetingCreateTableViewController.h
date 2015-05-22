@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+extern NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting;
+
 @interface MeetingCreateTableViewController : UITableViewController
 
 @end

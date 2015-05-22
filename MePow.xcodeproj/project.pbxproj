@@ -53,9 +53,9 @@
 		F79AB3921B0DF2E20042CAF0 /* HHLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB3821B0DF2E20042CAF0 /* HHLabel.m */; };
 		F79AB3931B0DF2E20042CAF0 /* HHTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB3841B0DF2E20042CAF0 /* HHTextView.m */; };
 		F79AB3941B0DF2E20042CAF0 /* UIView+HHKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB3861B0DF2E20042CAF0 /* UIView+HHKit.m */; };
+		F79AB3D31B0F26BE0042CAF0 /* RootTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB3D21B0F26BE0042CAF0 /* RootTableViewController.m */; };
 		F7A36C951B09B87E00C57DA6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A36C941B09B87E00C57DA6 /* main.m */; };
 		F7A36C981B09B87E00C57DA6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A36C971B09B87E00C57DA6 /* AppDelegate.m */; };
-		F7A36C9B1B09B87E00C57DA6 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A36C9A1B09B87E00C57DA6 /* ViewController.m */; };
 		F7A36C9E1B09B87E00C57DA6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F7A36C9C1B09B87E00C57DA6 /* Main.storyboard */; };
 		F7A36CA01B09B87E00C57DA6 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F7A36C9F1B09B87E00C57DA6 /* Images.xcassets */; };
 		F7A36CA31B09B87E00C57DA6 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = F7A36CA11B09B87E00C57DA6 /* LaunchScreen.xib */; };
@@ -191,13 +191,13 @@
 		F79AB3841B0DF2E20042CAF0 /* HHTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HHTextView.m; sourceTree = "<group>"; };
 		F79AB3851B0DF2E20042CAF0 /* UIView+HHKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+HHKit.h"; sourceTree = "<group>"; };
 		F79AB3861B0DF2E20042CAF0 /* UIView+HHKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+HHKit.m"; sourceTree = "<group>"; };
+		F79AB3D11B0F26BE0042CAF0 /* RootTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTableViewController.h; sourceTree = "<group>"; };
+		F79AB3D21B0F26BE0042CAF0 /* RootTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTableViewController.m; sourceTree = "<group>"; };
 		F7A36C8F1B09B87E00C57DA6 /* MePow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MePow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7A36C931B09B87E00C57DA6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F7A36C941B09B87E00C57DA6 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F7A36C961B09B87E00C57DA6 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		F7A36C971B09B87E00C57DA6 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		F7A36C991B09B87E00C57DA6 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		F7A36C9A1B09B87E00C57DA6 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		F7A36C9D1B09B87E00C57DA6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F7A36C9F1B09B87E00C57DA6 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		F7A36CA21B09B87E00C57DA6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
@@ -484,8 +484,8 @@
 				F79AB2F21B0DCAD70042CAF0 /* MPWGlobal.m */,
 				F7A36C961B09B87E00C57DA6 /* AppDelegate.h */,
 				F7A36C971B09B87E00C57DA6 /* AppDelegate.m */,
-				F7A36C991B09B87E00C57DA6 /* ViewController.h */,
-				F7A36C9A1B09B87E00C57DA6 /* ViewController.m */,
+				F79AB3D11B0F26BE0042CAF0 /* RootTableViewController.h */,
+				F79AB3D21B0F26BE0042CAF0 /* RootTableViewController.m */,
 				F7A36CE31B09BE8800C57DA6 /* EmptyViewController.h */,
 				F7A36CE41B09BE8800C57DA6 /* EmptyViewController.m */,
 				F79AB2F71B0DD31F0042CAF0 /* MeetingCreateTableViewController.h */,
@@ -677,7 +677,6 @@
 				F79AB3941B0DF2E20042CAF0 /* UIView+HHKit.m in Sources */,
 				F79AB32C1B0DE3680042CAF0 /* MRProgressView+AFNetworking.m in Sources */,
 				F79942FC1B0EC0F300161E77 /* MeetingTableViewController.m in Sources */,
-				F7A36C9B1B09B87E00C57DA6 /* ViewController.m in Sources */,
 				F79AB3641B0DE3AB0042CAF0 /* UIProgressView+AFNetworking.m in Sources */,
 				F79AB3241B0DE3680042CAF0 /* MRCircularProgressView.m in Sources */,
 				F79AB3891B0DF2E20042CAF0 /* UINavigationController+HHKit.m in Sources */,
@@ -701,6 +700,7 @@
 				F79AB3581B0DE3AB0042CAF0 /* AFHTTPSessionManager.m in Sources */,
 				F79AB2F91B0DD31F0042CAF0 /* MeetingCreateTableViewController.m in Sources */,
 				F79AB3901B0DF2E20042CAF0 /* HHActionSheet.m in Sources */,
+				F79AB3D31B0F26BE0042CAF0 /* RootTableViewController.m in Sources */,
 				F79AB3911B0DF2E20042CAF0 /* HHAlertView.m in Sources */,
 				F79AB35D1B0DE3AB0042CAF0 /* AFURLResponseSerialization.m in Sources */,
 				F79AB35C1B0DE3AB0042CAF0 /* AFURLRequestSerialization.m in Sources */,
