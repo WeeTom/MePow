@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F79942FC1B0EC0F300161E77 /* MeetingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F79942FB1B0EC0F300161E77 /* MeetingTableViewController.m */; };
 		F79AB2F31B0DCAD70042CAF0 /* MPWGlobal.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB2F21B0DCAD70042CAF0 /* MPWGlobal.m */; };
 		F79AB2F91B0DD31F0042CAF0 /* MeetingCreateTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB2F81B0DD31F0042CAF0 /* MeetingCreateTableViewController.m */; };
 		F79AB3211B0DE3680042CAF0 /* MRBlurView.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB2FD1B0DE3680042CAF0 /* MRBlurView.m */; };
@@ -91,6 +92,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F79942FA1B0EC0F300161E77 /* MeetingTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeetingTableViewController.h; sourceTree = "<group>"; };
+		F79942FB1B0EC0F300161E77 /* MeetingTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeetingTableViewController.m; sourceTree = "<group>"; };
 		F79AB2F11B0DCAD70042CAF0 /* MPWGlobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPWGlobal.h; sourceTree = "<group>"; };
 		F79AB2F21B0DCAD70042CAF0 /* MPWGlobal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPWGlobal.m; sourceTree = "<group>"; };
 		F79AB2F71B0DD31F0042CAF0 /* MeetingCreateTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeetingCreateTableViewController.h; sourceTree = "<group>"; };
@@ -487,6 +490,8 @@
 				F7A36CE41B09BE8800C57DA6 /* EmptyViewController.m */,
 				F79AB2F71B0DD31F0042CAF0 /* MeetingCreateTableViewController.h */,
 				F79AB2F81B0DD31F0042CAF0 /* MeetingCreateTableViewController.m */,
+				F79942FA1B0EC0F300161E77 /* MeetingTableViewController.h */,
+				F79942FB1B0EC0F300161E77 /* MeetingTableViewController.m */,
 				F7A36C9C1B09B87E00C57DA6 /* Main.storyboard */,
 				F7A36C9F1B09B87E00C57DA6 /* Images.xcassets */,
 				F7A36CA11B09B87E00C57DA6 /* LaunchScreen.xib */,
@@ -671,6 +676,7 @@
 				F79AB38A1B0DF2E20042CAF0 /* UIViewController+StoreKit.m in Sources */,
 				F79AB3941B0DF2E20042CAF0 /* UIView+HHKit.m in Sources */,
 				F79AB32C1B0DE3680042CAF0 /* MRProgressView+AFNetworking.m in Sources */,
+				F79942FC1B0EC0F300161E77 /* MeetingTableViewController.m in Sources */,
 				F7A36C9B1B09B87E00C57DA6 /* ViewController.m in Sources */,
 				F79AB3641B0DE3AB0042CAF0 /* UIProgressView+AFNetworking.m in Sources */,
 				F79AB3241B0DE3680042CAF0 /* MRCircularProgressView.m in Sources */,

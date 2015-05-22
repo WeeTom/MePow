@@ -8,8 +8,10 @@
 
 #import "ViewController.h"
 #import "EmptyViewController.h"
-#import <ParseUI/ParseUI.h>
 #import "MRProgress.h"
+#import "HHKit.h"
+#import "MeetingTableViewController.h"
+
 
 @interface ViewController () <UICollectionViewDataSource, UICollectionViewDelegate, PFLogInViewControllerDelegate, PFSignUpViewControllerDelegate>
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
@@ -42,10 +44,12 @@
             return task;
         }
         
-        self.meetings = [NSMutableArray array];
-        [self.meetings addObjectsFromArray:task.result];
-        [self.collectionView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
-        [progressView dismiss:YES];
+        [HHThreadHelper performBlockInMainThread:^{
+            self.meetings = [NSMutableArray array];
+            [self.meetings addObjectsFromArray:task.result];
+            [self.collectionView reloadData];
+            [progressView dismiss:YES];
+        }];
         return task;
     }];
 }
@@ -97,5 +101,15 @@
     PFObject *meeting = self.meetings[indexPath.row];
     label.text = meeting[@"name"];
     return cell;
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([segue.identifier isEqualToString:@"Meeting"]) {
+        MeetingTableViewController *vc = segue.destinationViewController;
+        NSIndexPath *ip = [self.collectionView indexPathForCell:sender];
+        PFObject *meeting = self.meetings[ip.row];
+        vc.meeting = meeting;
+    }
 }
 @end
