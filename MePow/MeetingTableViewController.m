@@ -8,32 +8,42 @@
 
 #import "MeetingTableViewController.h"
 #import "EmptyViewController.h"
+#import "MDBlockButton.h"
+#import "TextEditingController.h"
 
 NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControllerDidDeleteMeeting";
 
-@interface MeetingTableViewController () <UITextFieldDelegate>
+@interface MeetingTableViewController () <UITextViewDelegate, TextEditingControllerDelegate>
+@property (strong, nonatomic) IBOutlet UIView *headerView;
+@property (strong, nonatomic) IBOutlet UIButton *startPauseBtn;
+@property (strong, nonatomic) IBOutlet UILabel *countDownLabel;
+@property (strong, nonatomic) IBOutlet UIButton *stopBtn;
+@property (strong, nonatomic) IBOutlet UIProgressView *progressView;
+@property (strong, nonatomic) IBOutlet UILabel *recordingLabel;
+@property (strong, nonatomic) IBOutlet UIProgressView *recordingPV;
+@property (strong, nonatomic) IBOutlet UIProgressView *timerPV;
 @property (strong, nonatomic) NSMutableArray *notes;
 @property (strong, nonatomic) EmptyViewController *emptyVC;
-@property (strong, nonatomic) NSArray *originToolbarItems;
-@property (assign, nonatomic) CGRect originFrameForToolbar;
 @property (strong, nonatomic) UITextField *editingTextField;
 @property (assign, nonatomic) BOOL shouldReload;
+@property (strong, nonatomic) NSIndexPath *editingIndexPath;
 @end
 
 @implementation MeetingTableViewController
 - (void)dealloc
 {
     _meeting = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+
     self.title = self.meeting[@"name"];
-    
+    self.tableView.estimatedRowHeight = 100.0;
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
+    self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+    self.tableView.estimatedSectionHeaderHeight = 100;
+    self.tableView.sectionHeaderHeight = UITableViewAutomaticDimension;
     self.shouldReload = YES;
     self.notes = [NSMutableArray array];
 }
@@ -43,22 +53,13 @@ NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControl
     [super viewWillAppear:animated];
     self.navigationController.toolbar.translucent = NO;
     [self.navigationController setToolbarHidden:NO animated:YES];
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    if (!self.originToolbarItems) {
-        self.originToolbarItems = self.toolbarItems;
-        self.originFrameForToolbar = self.navigationController.toolbar.frame;
-    }
     
     if (self.shouldReload) {
         self.shouldReload = NO;
         PFQuery *query = [PFQuery queryWithClassName:@"Note"];
         [query fromLocalDatastore];
-        [query whereKey:@"meetingID" equalTo:self.meeting.objectId];
-        [query orderByDescending:@"createTime"];
+        [query whereKey:@"meeting" equalTo:self.meeting];
+        [query orderByAscending:@"createTime"];
         [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
             if (task.error) {
                 NSLog(@"Error: %@", task.error);
@@ -72,11 +73,16 @@ NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControl
             return task;
         }];
     }
+
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-    self.navigationController.toolbar.frame = self.originFrameForToolbar;
     [self.navigationController setToolbarHidden:YES animated:NO];
     [super viewWillDisappear:animated];
 }
@@ -96,59 +102,49 @@ NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControl
     return self.notes.count;
 }
 
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    return self.headerView;
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSDateFormatter *fm = [[NSDateFormatter alloc] init];
+    [fm setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    PFObject *note = self.notes[indexPath.row];
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"NoteTextCell" forIndexPath:indexPath];
-    if (indexPath.row < self.notes.count) {
-        PFObject *note = self.notes[indexPath.row];
-        UILabel *label = (UILabel *)[cell viewWithTag:1];
-        label.text = note[@"content"];
-    }
+    UILabel *label = (UILabel *)[cell viewWithTag:1];
+    label.text = note[@"content"];
+    
+    UILabel *label2 = (UILabel *)[cell viewWithTag:2];
+    label2.text = [fm stringFromDate:note[@"createTime"]];
+    
     return cell;
 }
 
-/*
-// Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
     return YES;
 }
-*/
 
-/*
-// Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
+        PFObject *note = self.notes[indexPath.row];
+        [note unpin];
+        [note deleteEventually];
+        [self.notes removeObject:note];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+        
+        if (self.notes.count == 0) {
+            [self showEmptyVC];
+        }
+    }
 }
-*/
 
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 #pragma mark - Empty
 - (void)showEmptyVC
@@ -168,7 +164,7 @@ NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControl
     [self.emptyVC setupWithImage:nil text:@"Take a note or never!" actionHandler:^(EmptyViewController *emptyViewController){
         HHActionSheet *ac = [[HHActionSheet alloc] initWithTitle:@"Choose a note"];
         [ac addButtonWithTitle:@"Text" block:^{
-            [self textBtnPressed:nil];
+            [self performSegueWithIdentifier:@"TextEdit" sender:nil];
         }];
         [ac addButtonWithTitle:@"Voice" block:^{
             [self voiceBtnPressed:nil];
@@ -217,90 +213,53 @@ NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControl
     [actionSheet showInView:self.view];
 }
 
-- (void)backToOriginItems
-{
-    [self setToolbarItems:self.originToolbarItems animated:YES];
-}
-
-- (void)saveText:(UITextField *)textField
-{
-    PFObject *note = [PFObject objectWithClassName:@"Note"];
-    note[@"type"] = @0;
-    note[@"content"] = textField.text;
-    note[@"creator"] = [[PFUser currentUser] objectId];
-    note[@"meetingID"] = self.meeting.objectId;
-    note[@"createTime"] = @([[NSDate date] timeIntervalSince1970]);
-    [note pin];
-    [note saveEventually];
-    [self.notes addObject:note];
-    NSIndexPath *ip = [NSIndexPath indexPathForRow:self.notes.count - 1 inSection:0];
-    [self.tableView insertRowsAtIndexPaths:@[ip] withRowAnimation:UITableViewRowAnimationRight];
-    [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:YES];
-    [self hideEmptyVC];
-    textField.text = @"";
-}
-
-- (IBAction)textBtnPressed:(id)sender {
-    UITextField *tf = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width - 100, self.navigationController.toolbar.height - 8)];
-    tf.returnKeyType = UIReturnKeyDone;
-    tf.delegate = self;
-    self.editingTextField = tf;
-    UIBarButtonItem *textFieldItem = [[UIBarButtonItem alloc] initWithCustomView:tf];
-    UIBarButtonItem *flexiItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(backToOriginItems)];
-    [self setToolbarItems:@[cancelItem, flexiItem, textFieldItem] animated:YES];
-    [tf becomeFirstResponder];
-}
-
 - (IBAction)voiceBtnPressed:(id)sender {
-
+    self.recordingLabel.hidden = NO;
+    self.recordingPV.hidden = NO;
 }
 
 - (IBAction)imageBtnPressed:(id)sender {
 
 }
 
+- (IBAction)startPauseBtnPressed:(id)sender {
+    self.startPauseBtn.selected = !self.startPauseBtn.selected;
+    self.stopBtn.enabled = YES;
+}
+
+- (IBAction)stopBtnPressed:(id)sender {
+    self.startPauseBtn.selected = NO;
+    self.stopBtn.enabled = NO;
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([segue.identifier isEqualToString:@"TextEdit"]) {
+        UINavigationController *nc = segue.destinationViewController;
+        TextEditingController *vc = nc.viewControllers.firstObject;
+        vc.delegate = self;
+    }
+}
+
+#pragma mark - TextEditingController
+- (void)textEditingController:(TextEditingController *)controller didFinishEditingTextWithResult:(NSString *)text
+{
+    if (text.trim.length > 0) {
+        PFObject *note = [PFObject objectWithClassName:@"Note"];
+        note[@"type"] = @0;
+        note[@"content"] = text;
+        note[@"creator"] = [PFUser currentUser];
+        note[@"meeting"] = self.meeting;
+        note[@"createTime"] = [NSDate date];
+        [note pin];
+        [note saveEventually];
+        [self.notes addObject:note];
+        NSIndexPath *ip = [NSIndexPath indexPathForRow:self.notes.count - 1 inSection:0];
+        [self.tableView insertRowsAtIndexPaths:@[ip] withRowAnimation:UITableViewRowAnimationRight];
+        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+        [self hideEmptyVC];
+    }
+}
+
 #pragma mark - Notifications
-- (void)keyboardWillShow:(NSNotification *)notification
-{
-    CGRect keyboardRect = [[notification.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    double duration = 0.25;
-    __weak __block typeof(self) bslf = self;
-    
-    [UIView animateWithDuration:duration
-                          delay:0.0f
-                        options:UIViewAnimationOptionCurveEaseInOut
-                     animations:^{
-                         
-                         bslf.navigationController.toolbar.frame = CGRectMake(self.originFrameForToolbar.origin.x, self.originFrameForToolbar.origin.y - keyboardRect.size.height, self.originFrameForToolbar.size.width, self.originFrameForToolbar.size.height);
-                         
-                         bslf.tableView.frame = CGRectMake(0, 0, bslf.tableView.width, bslf.navigationController.toolbar.frame.origin.y);
-                     }
-                     completion:^(BOOL finished) {
-                         
-                     }];
-}
-
-- (void)keyboardWillHide:(NSNotification *)notification
-{
-    double duration = 0.25;
-    [UIView animateWithDuration:duration
-                          delay:0.0f
-                        options:UIViewAnimationOptionCurveEaseInOut
-                     animations:^{
-                         self.navigationController.toolbar.frame = self.originFrameForToolbar;
-                         
-                         self.tableView.frame = CGRectMake(0, 0, self.tableView.width, self.navigationController.toolbar.frame.origin.y);
-                     }
-                     completion:^(BOOL finished) {
-                         
-                     }];
-}
-
-#pragma mark - TextField
-- (BOOL)textFieldShouldReturn:(UITextField *)textField
-{
-    [self saveText:textField];
-    return NO;
-}
 @end

@@ -29,6 +29,8 @@
     [super viewDidLoad];
     self.shouldReload = YES;
     
+    self.tableView.estimatedRowHeight = 44;
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(meetingDeleted:) name:MeetingTableViewControllerDidDeleteMeeting object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(meetingCreated:) name:MeetingCreateTableViewControllerDidFinishCreatingMeeting object:nil];
 }
@@ -49,7 +51,7 @@
         self.shouldReload = NO;
         PFQuery *query = [PFQuery queryWithClassName:@"Meeting"];
         [query fromLocalDatastore];
-        [query whereKey:@"creator" equalTo:user.objectId];
+        [query whereKey:@"creator" equalTo:user];
         [query orderByDescending:@"begin"];
         [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
             if (task.error) {
@@ -87,56 +89,36 @@
     
     PFObject *meeting = self.meetings[indexPath.row];
     cell.textLabel.text = meeting[@"name"];
-    NSDate *date = [NSDate dateWithTimeIntervalSince1970:[meeting[@"begin"] floatValue]];
+    NSDate *date = meeting[@"begin"];
     NSDateFormatter *fm = [[NSDateFormatter alloc] init];
     [fm setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     cell.detailTextLabel.text = [fm stringFromDate:date];
     return cell;
 }
 
-/*
-// Override to support conditional editing of the table view.
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
     return YES;
 }
-*/
 
-/*
-// Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+        HHActionSheet *actionSheet = [[HHActionSheet alloc] initWithTitle:@"This action can not be undone"];
+        [actionSheet addDestructiveButtonWithTitle:@"Yes, delete it" block:^{
+            PFObject *meeting = self.meetings[indexPath.row];
+            [meeting unpin];
+            [meeting deleteEventually];
+            [self.meetings removeObjectAtIndex:indexPath.row];
+            [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        }];
+        [actionSheet addCancelButtonWithTitle:@"No, keep it"];
+        [actionSheet showInView:self.view];
+    }
 }
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 #pragma mark - Empty
 - (void)showEmptyVC
@@ -221,7 +203,7 @@
     MRProgressOverlayView *progressView = [MRProgressOverlayView showOverlayAddedTo:self.view animated:YES];
     [progressView show:YES];
     PFQuery *query = [PFQuery queryWithClassName:@"Meeting"];
-    [query whereKey:@"creator" equalTo:user.objectId];
+    [query whereKey:@"creator" equalTo:user];
     [query orderByDescending:@"begin"];
     [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
         if (task.error) {
@@ -239,4 +221,11 @@
     }];
 }
 
+#pragma mark - Login
+- (void)logInViewController:(PFLogInViewController * __nonnull)logInController didLogInUser:(PFUser * __nonnull)user
+{
+    [logInController dismissViewControllerAnimated:YES completion:^{
+        [self reloadBtnPressed:nil];
+    }];
+}
 @end

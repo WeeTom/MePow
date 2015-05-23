@@ -254,12 +254,13 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
     }
     
     PFObject *meeting = [PFObject objectWithClassName:@"Meeting"];
-    meeting[@"creator"] = [PFUser currentUser].objectId;
+    [meeting setObject:[PFUser currentUser] forKey:@"creator"];
     meeting[@"name"] = self.name.text;
     if (self.location.text.trim.length > 0) {
         meeting[@"location"] = self.location.text;
     }
-    meeting[@"begin"] = @([self.picker.date timeIntervalSince1970]);
+    meeting[@"createTime"] = [NSDate date];
+    meeting[@"begin"] = self.picker.date;
     meeting[@"duration"] = @(self.duration);
     [meeting pin];
     [meeting saveEventually];

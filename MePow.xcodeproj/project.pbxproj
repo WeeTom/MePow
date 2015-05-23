@@ -54,6 +54,8 @@
 		F79AB3931B0DF2E20042CAF0 /* HHTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB3841B0DF2E20042CAF0 /* HHTextView.m */; };
 		F79AB3941B0DF2E20042CAF0 /* UIView+HHKit.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB3861B0DF2E20042CAF0 /* UIView+HHKit.m */; };
 		F79AB3D31B0F26BE0042CAF0 /* RootTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB3D21B0F26BE0042CAF0 /* RootTableViewController.m */; };
+		F79C0DB81B10489600791CC1 /* MDBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = F79C0DB71B10489600791CC1 /* MDBlockButton.m */; };
+		F79C0DBB1B10680500791CC1 /* TextEditingController.m in Sources */ = {isa = PBXBuildFile; fileRef = F79C0DBA1B10680500791CC1 /* TextEditingController.m */; };
 		F7A36C951B09B87E00C57DA6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A36C941B09B87E00C57DA6 /* main.m */; };
 		F7A36C981B09B87E00C57DA6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A36C971B09B87E00C57DA6 /* AppDelegate.m */; };
 		F7A36C9E1B09B87E00C57DA6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F7A36C9C1B09B87E00C57DA6 /* Main.storyboard */; };
@@ -193,6 +195,10 @@
 		F79AB3861B0DF2E20042CAF0 /* UIView+HHKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+HHKit.m"; sourceTree = "<group>"; };
 		F79AB3D11B0F26BE0042CAF0 /* RootTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTableViewController.h; sourceTree = "<group>"; };
 		F79AB3D21B0F26BE0042CAF0 /* RootTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTableViewController.m; sourceTree = "<group>"; };
+		F79C0DB61B10489600791CC1 /* MDBlockButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MDBlockButton.h; sourceTree = "<group>"; };
+		F79C0DB71B10489600791CC1 /* MDBlockButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MDBlockButton.m; sourceTree = "<group>"; };
+		F79C0DB91B10680500791CC1 /* TextEditingController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextEditingController.h; sourceTree = "<group>"; };
+		F79C0DBA1B10680500791CC1 /* TextEditingController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextEditingController.m; sourceTree = "<group>"; };
 		F7A36C8F1B09B87E00C57DA6 /* MePow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MePow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7A36C931B09B87E00C57DA6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F7A36C941B09B87E00C57DA6 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -480,6 +486,8 @@
 		F7A36C911B09B87E00C57DA6 /* MePow */ = {
 			isa = PBXGroup;
 			children = (
+				F79C0DB61B10489600791CC1 /* MDBlockButton.h */,
+				F79C0DB71B10489600791CC1 /* MDBlockButton.m */,
 				F79AB2F11B0DCAD70042CAF0 /* MPWGlobal.h */,
 				F79AB2F21B0DCAD70042CAF0 /* MPWGlobal.m */,
 				F7A36C961B09B87E00C57DA6 /* AppDelegate.h */,
@@ -492,6 +500,8 @@
 				F79AB2F81B0DD31F0042CAF0 /* MeetingCreateTableViewController.m */,
 				F79942FA1B0EC0F300161E77 /* MeetingTableViewController.h */,
 				F79942FB1B0EC0F300161E77 /* MeetingTableViewController.m */,
+				F79C0DB91B10680500791CC1 /* TextEditingController.h */,
+				F79C0DBA1B10680500791CC1 /* TextEditingController.m */,
 				F7A36C9C1B09B87E00C57DA6 /* Main.storyboard */,
 				F7A36C9F1B09B87E00C57DA6 /* Images.xcassets */,
 				F7A36CA11B09B87E00C57DA6 /* LaunchScreen.xib */,
@@ -678,6 +688,7 @@
 				F79AB32C1B0DE3680042CAF0 /* MRProgressView+AFNetworking.m in Sources */,
 				F79942FC1B0EC0F300161E77 /* MeetingTableViewController.m in Sources */,
 				F79AB3641B0DE3AB0042CAF0 /* UIProgressView+AFNetworking.m in Sources */,
+				F79C0DBB1B10680500791CC1 /* TextEditingController.m in Sources */,
 				F79AB3241B0DE3680042CAF0 /* MRCircularProgressView.m in Sources */,
 				F79AB3891B0DF2E20042CAF0 /* UINavigationController+HHKit.m in Sources */,
 				F79AB35B1B0DE3AB0042CAF0 /* AFURLConnectionOperation.m in Sources */,
@@ -690,6 +701,7 @@
 				F79AB32E1B0DE3680042CAF0 /* MRMethodCopier.m in Sources */,
 				F79AB35F1B0DE3AB0042CAF0 /* AFNetworkActivityIndicatorManager.m in Sources */,
 				F79AB3561B0DE3AB0042CAF0 /* AFHTTPRequestOperation.m in Sources */,
+				F79C0DB81B10489600791CC1 /* MDBlockButton.m in Sources */,
 				F7A36C981B09B87E00C57DA6 /* AppDelegate.m in Sources */,
 				F79AB3591B0DE3AB0042CAF0 /* AFNetworkReachabilityManager.m in Sources */,
 				F79AB3611B0DE3AB0042CAF0 /* UIAlertView+AFNetworking.m in Sources */,
