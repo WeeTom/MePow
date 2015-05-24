@@ -17,9 +17,10 @@ NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControl
 
 NSString *MeetingTableViewControllerImageUploadPercentChanged = @"MeetingTableViewControllerImageUploadPercentChanged";
 NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableViewControllerRecordUploadPercentChanged";
+NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTableViewControllerRecordDownloadPercentChanged";
 
 
-@interface MeetingTableViewController () <UITextViewDelegate, TextEditingControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, AVAudioRecorderDelegate>
+@interface MeetingTableViewController () <UITextViewDelegate, TextEditingControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, AVAudioRecorderDelegate, AVAudioPlayerDelegate>
 @property (strong, nonatomic) IBOutlet UIView *headerView;
 @property (strong, nonatomic) IBOutlet UIButton *startPauseBtn;
 @property (strong, nonatomic) IBOutlet UILabel *countDownLabel;
@@ -30,12 +31,16 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
 @property (strong, nonatomic) NSMutableArray *notes;
 @property (strong, nonatomic) EmptyViewController *emptyVC;
 @property (assign, nonatomic) BOOL shouldReload, audioSessionPermitted;
-@property (strong, nonatomic) NSIndexPath *editingIndexPath;
+@property (strong, nonatomic) PFObject *playingNote;
+@property (strong, nonatomic) AVAudioPlayer *player;
 @end
 
 @implementation MeetingTableViewController
 - (void)dealloc
 {
+    _playingNote = nil;
+    [_player stop];
+    _player = nil;
     _meeting = nil;
     _headerView = nil;
     _startPauseBtn = nil;
@@ -50,6 +55,7 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
     [MPWGlobal sharedInstance].recorder.label = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MeetingTableViewControllerImageUploadPercentChanged object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MeetingTableViewControllerRecordUploadPercentChanged object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:MeetingTableViewControllerRecordDownloadPercentChanged object:nil];
 }
 
 - (void)viewDidLoad {
@@ -57,7 +63,8 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(imagePercentChanged:) name:MeetingTableViewControllerImageUploadPercentChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(recordPercentChanged:) name:MeetingTableViewControllerRecordUploadPercentChanged object:nil];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(recordDownloadPercentChanged:) name:MeetingTableViewControllerRecordDownloadPercentChanged object:nil];
+
     self.title = self.meeting[@"name"];
     self.tableView.estimatedRowHeight = 200.0;
     self.tableView.rowHeight = UITableViewAutomaticDimension;
@@ -96,6 +103,7 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
         [MPWGlobal sharedInstance].recorder.label = self.recordingLabel;
     }
     
+    __weak __block typeof(self) weakSelf = self;
     if (self.shouldReload) {
         self.shouldReload = NO;
         PFQuery *query = [PFQuery queryWithClassName:@"Note"];
@@ -117,7 +125,7 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
                 }
                 [object pin];
             }
-            [self reloadTableViewWithItems:task.result];
+            [weakSelf reloadTableViewWithItems:task.result];
             return task;
         }];
     }
@@ -157,7 +165,8 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     PFObject *note = self.notes[indexPath.row];
-    
+    __weak __block typeof(self) weakSelf = self;
+
     NSDateFormatter *fm = [[NSDateFormatter alloc] init];
     [fm setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     int type = [note[@"type"] intValue];
@@ -181,6 +190,11 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
         label2.textColor = [UIColor lightGrayColor];
         
         UIProgressView *pv = (UIProgressView *)[cell viewWithTag:3];
+        
+        MDBlockButton *btn = (MDBlockButton *)[cell viewWithTag:4];
+        btn.buttonBlock = ^(MDBlockButton *button){
+            [weakSelf playVoiceForNote:note];
+        };
         
         BOOL local = note[@"local"];
         if (local) {
@@ -235,7 +249,7 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
                 pv.hidden = YES;
                 if (cacheType == SDImageCacheTypeNone) {
                     NSString *realName = [[file.name componentsSeparatedByString:@"-"] lastObject];
-                    NSString *path = [[[MPWGlobal imagePathForMeeting:self.meeting] stringByAppendingPathComponent:realName] stringByAppendingPathExtension:@"png"];
+                    NSString *path = [[[MPWGlobal imagePathForMeeting:weakSelf.meeting] stringByAppendingPathComponent:realName] stringByAppendingPathExtension:@"png"];
                     NSData *imageData = UIImagePNGRepresentation(image);
                     [imageData writeToFile:path atomically:YES];
                 }
@@ -496,6 +510,46 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
     self.stopBtn.enabled = NO;
 }
 
+- (void)playVoiceForNote:(PFObject *)note
+{
+    NSIndexPath *ip = [NSIndexPath indexPathForRow:[self.notes indexOfObject:note] inSection:0];
+
+    if (self.playingNote) {
+        NSIndexPath *playingIP = [NSIndexPath indexPathForRow:[self.notes indexOfObject:self.playingNote] inSection:0];
+        UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:playingIP];
+
+        UIProgressView *pv = (UIProgressView *)[cell viewWithTag:3];
+        pv.progress = 0;
+        pv.hidden = YES;
+        MDBlockButton *btn = (MDBlockButton *)[cell viewWithTag:4];
+        btn.selected = NO;
+        [self.player stop];
+        
+        if ([playingIP isEqual:ip]) {
+            self.playingNote = nil;
+            self.player = nil;
+            return;
+        }
+        self.playingNote = nil;
+        self.player = nil;
+    }
+    
+    PFFile *record = note[@"record"];
+    
+    [record getDataInBackgroundWithBlock:^(NSData *data, NSError *error){
+        if (error) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:MeetingTableViewControllerRecordDownloadPercentChanged object:note userInfo:@{@"failed":@YES}];
+            return ;
+        }
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:MeetingTableViewControllerRecordDownloadPercentChanged object:note userInfo:@{@"completed":@YES, @"data":data}];
+
+    } progressBlock:^(int percentDone){
+        [[NSNotificationCenter defaultCenter] postNotificationName:MeetingTableViewControllerRecordDownloadPercentChanged object:note userInfo:@{@"percentDone":@(percentDone)}];
+    }];
+    self.playingNote = note;
+}
+
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([segue.identifier isEqualToString:@"TextEdit"]) {
@@ -565,6 +619,31 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
         [note pin];
         [[NSNotificationCenter defaultCenter] postNotificationName:MeetingTableViewControllerRecordUploadPercentChanged object:note];
     }];
+}
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
+{
+    NSIndexPath *ip = [NSIndexPath indexPathForRow:[self.notes indexOfObject:self.playingNote] inSection:0];
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:ip];
+    UIProgressView *pv = (UIProgressView *)[cell viewWithTag:3];
+    pv.hidden = YES;
+    MDBlockButton *btn = (MDBlockButton *)[cell viewWithTag:4];
+    btn.selected = NO;
+    self.playingNote = nil;
+    self.player = nil;
+}
+
+/* if an error occurs while decoding it will be reported to the delegate. */
+- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError *)error
+{
+    NSIndexPath *ip = [NSIndexPath indexPathForRow:[self.notes indexOfObject:self.playingNote] inSection:0];
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:ip];
+    UIProgressView *pv = (UIProgressView *)[cell viewWithTag:3];
+    pv.hidden = YES;
+    MDBlockButton *btn = (MDBlockButton *)[cell viewWithTag:4];
+    btn.selected = NO;
+    self.playingNote = nil;
+    self.player = nil;
 }
 
 #pragma mark - TextEditingController
@@ -641,6 +720,43 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
                 pv.hidden = YES;
                 label2.textColor = [UIColor redColor];
                 label2.text = @"Failed tap to upload again";
+            } else {
+                NSDateFormatter *fm = [[NSDateFormatter alloc] init];
+                [fm setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+                label2.text = [fm stringFromDate:note[@"createTime"]];
+                label2.textColor = [UIColor lightGrayColor];
+                int percentDone = [note[@"percentDone"] intValue];
+                pv.hidden = NO;
+                pv.progress = percentDone/100.0;
+            }
+        }
+    }
+}
+
+- (void)recordDownloadPercentChanged:(NSNotification *)notification
+{
+    PFObject *note = notification.object;
+    if ([self.notes containsObject:note]) {
+        NSIndexPath *ip = [NSIndexPath indexPathForRow:[self.notes indexOfObject:note] inSection:0];
+        UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:ip];
+        UIProgressView *pv = (UIProgressView *)[cell viewWithTag:3];
+        
+        MDBlockButton *btn = (MDBlockButton *)[cell viewWithTag:4];
+        
+        if ([notification.userInfo[@"completed"] boolValue]) {
+            pv.hidden = YES;
+            NSError *error = nil;
+            AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithData:notification.userInfo[@"data"] error:&error];
+            player.delegate = self;
+            self.player = player;
+            [player play];
+            btn.selected = YES;
+        } else {
+            UILabel *label2 = (UILabel *)[cell viewWithTag:2];
+            if ([note[@"failed"] boolValue]) {
+                pv.hidden = YES;
+                label2.textColor = [UIColor redColor];
+                label2.text = @"Failed tap to download again";
             } else {
                 NSDateFormatter *fm = [[NSDateFormatter alloc] init];
                 [fm setDateFormat:@"yyyy-MM-dd HH:mm:ss"];

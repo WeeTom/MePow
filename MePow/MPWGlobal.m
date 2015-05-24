@@ -18,6 +18,7 @@ static MPWGlobal *sharedInstance = nil;
         {
             sharedInstance = [[MPWGlobal alloc] init];
             sharedInstance.uploadingFiles = [NSMutableArray array];
+            sharedInstance.downloadingFiles = [NSMutableArray array];
         }
     }
     return sharedInstance;

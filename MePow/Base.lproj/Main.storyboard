@@ -359,6 +359,7 @@
                                             <state key="normal" title="Play">
                                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                             </state>
+                                            <state key="selected" title="Stop"/>
                                         </button>
                                     </subviews>
                                     <constraints>

@@ -15,6 +15,6 @@
 + (NSString *)imagePathForMeeting:(PFObject *)meeting;
 + (NSString *)recordPathForMeeting:(PFObject *)meeting;
 
-@property (strong, nonatomic) NSMutableArray *uploadingFiles;
+@property (strong, nonatomic) NSMutableArray *uploadingFiles, *downloadingFiles;
 @property (strong, nonatomic) MPWRecorder *recorder;
 @end
