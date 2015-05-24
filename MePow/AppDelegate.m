@@ -14,7 +14,6 @@
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [Parse enableLocalDatastore];
     NSDictionary *configuration = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Configuration" ofType:@"plist"]];
@@ -25,6 +24,8 @@
     [PFAnalytics trackAppOpenedWithLaunchOptions:launchOptions];
 
     [self registerPushService];
+    
+    [MPWGlobal sharedInstance];
     return YES;
 }
 

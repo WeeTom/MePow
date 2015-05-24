@@ -7,9 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MPWRecorder.h"
 
 @interface MPWGlobal : NSObject
 + (MPWGlobal *)sharedInstance;
 
-@property (strong, nonatomic) PFUser *currentUser;
++ (NSString *)imagePathForMeeting:(PFObject *)meeting;
++ (NSString *)recordPathForMeeting:(PFObject *)meeting;
+
+@property (strong, nonatomic) NSMutableArray *uploadingFiles;
+@property (strong, nonatomic) MPWRecorder *recorder;
 @end

@@ -295,68 +295,85 @@
                                     </constraints>
                                 </tableViewCellContentView>
                             </tableViewCell>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NoteImageCell" id="Gan-Bc-O2p">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NoteImageCell" rowHeight="224" id="Gan-Bc-O2p">
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Gan-Bc-O2p" id="zsz-Fw-e1Z">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <imageView userInteractionEnabled="NO" tag="1" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="tKb-Pt-XDX">
-                                            <rect key="frame" x="8" y="8" width="584" height="63"/>
+                                        <imageView opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" tag="1" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" placeholderIntrinsicWidth="200" placeholderIntrinsicHeight="200" image="defaultLoadingImage" translatesAutoresizingMaskIntoConstraints="NO" id="tKb-Pt-XDX">
+                                            <rect key="frame" x="8" y="8" width="584" height="185"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="185" id="kCK-Ss-EVj"/>
+                                            </constraints>
                                         </imageView>
+                                        <progressView hidden="YES" opaque="NO" tag="3" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pSI-dj-8pW">
+                                            <rect key="frame" x="8" y="221" width="584" height="2"/>
+                                        </progressView>
+                                        <label opaque="NO" userInteractionEnabled="NO" tag="2" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oqu-1N-o2Y">
+                                            <rect key="frame" x="8" y="201" width="30.5" height="14.5"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="tKb-Pt-XDX" firstAttribute="top" secondItem="zsz-Fw-e1Z" secondAttribute="topMargin" id="4bc-ut-NhG"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="tKb-Pt-XDX" secondAttribute="bottom" id="6Tp-2L-TiU"/>
-                                        <constraint firstItem="tKb-Pt-XDX" firstAttribute="leading" secondItem="zsz-Fw-e1Z" secondAttribute="leadingMargin" id="cDd-F8-475"/>
-                                        <constraint firstItem="tKb-Pt-XDX" firstAttribute="trailing" secondItem="zsz-Fw-e1Z" secondAttribute="trailingMargin" id="dmV-HD-xeh"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="tKb-Pt-XDX" secondAttribute="trailing" id="m6R-hb-Xae"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="tKb-Pt-XDX" secondAttribute="bottom" id="nI5-KJ-RJC"/>
-                                        <constraint firstItem="tKb-Pt-XDX" firstAttribute="top" secondItem="zsz-Fw-e1Z" secondAttribute="topMargin" id="phG-Tf-QvN"/>
-                                        <constraint firstItem="tKb-Pt-XDX" firstAttribute="leading" secondItem="zsz-Fw-e1Z" secondAttribute="leadingMargin" id="wWb-EE-SZP"/>
+                                        <constraint firstItem="pSI-dj-8pW" firstAttribute="trailing" secondItem="zsz-Fw-e1Z" secondAttribute="trailingMargin" id="4vA-hv-9x8"/>
+                                        <constraint firstItem="tKb-Pt-XDX" firstAttribute="top" secondItem="zsz-Fw-e1Z" secondAttribute="topMargin" id="BYc-1J-ZM2"/>
+                                        <constraint firstItem="oqu-1N-o2Y" firstAttribute="bottom" secondItem="zsz-Fw-e1Z" secondAttribute="bottomMargin" id="Kjk-Pg-j2J"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="pSI-dj-8pW" secondAttribute="bottom" constant="-8" id="UOq-TJ-Pe0"/>
+                                        <constraint firstItem="pSI-dj-8pW" firstAttribute="leading" secondItem="zsz-Fw-e1Z" secondAttribute="leadingMargin" id="W3N-ah-pCh"/>
+                                        <constraint firstItem="oqu-1N-o2Y" firstAttribute="top" secondItem="tKb-Pt-XDX" secondAttribute="bottom" constant="8" id="WJs-HF-BbJ"/>
+                                        <constraint firstItem="tKb-Pt-XDX" firstAttribute="trailing" secondItem="zsz-Fw-e1Z" secondAttribute="trailingMargin" id="dyn-MX-Nyk"/>
+                                        <constraint firstItem="oqu-1N-o2Y" firstAttribute="leading" secondItem="zsz-Fw-e1Z" secondAttribute="leadingMargin" id="hTh-uG-KLj"/>
+                                        <constraint firstItem="tKb-Pt-XDX" firstAttribute="leading" secondItem="zsz-Fw-e1Z" secondAttribute="leadingMargin" id="scO-eg-2TA"/>
+                                        <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="oqu-1N-o2Y" secondAttribute="trailing" id="vge-VL-hW5"/>
                                     </constraints>
-                                    <variation key="default">
-                                        <mask key="constraints">
-                                            <exclude reference="4bc-ut-NhG"/>
-                                            <exclude reference="m6R-hb-Xae"/>
-                                            <exclude reference="nI5-KJ-RJC"/>
-                                            <exclude reference="wWb-EE-SZP"/>
-                                        </mask>
-                                    </variation>
                                 </tableViewCellContentView>
                             </tableViewCell>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NoteVoiceCell" id="c7u-h9-j04">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NoteVoiceCell" rowHeight="58" id="c7u-h9-j04">
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="c7u-h9-j04" id="CSY-kk-jCn">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <button opaque="NO" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="01i-EH-9Tl" customClass="MDBlockButton">
-                                            <rect key="frame" x="542" y="21" width="50" height="38"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" tag="1" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Voice 6s" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aAu-ly-RWJ">
+                                            <rect key="frame" x="8" y="8" width="64.5" height="20.5"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="20" id="AYw-JH-D7A"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" tag="2" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CBV-4r-Lup">
+                                            <rect key="frame" x="8" y="36" width="30.5" height="13.5"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <progressView opaque="NO" tag="3" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="q2A-hw-zHz">
+                                            <rect key="frame" x="8" y="55" width="584" height="2"/>
+                                        </progressView>
+                                        <button opaque="NO" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="01i-EH-9Tl" customClass="MDBlockButton">
+                                            <rect key="frame" x="542" y="10" width="50" height="38"/>
                                             <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
                                             <state key="normal" title="Play">
                                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                             </state>
                                         </button>
-                                        <label opaque="NO" userInteractionEnabled="NO" tag="1" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Voice 6s" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aAu-ly-RWJ">
-                                            <rect key="frame" x="8" y="8" width="64.5" height="20.5"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                        <textField opaque="NO" clipsSubviews="YES" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Converted Text" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="dWE-HQ-vt1">
-                                            <rect key="frame" x="8" y="41" width="119" height="30"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                            <textInputTraits key="textInputTraits"/>
-                                        </textField>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="01i-EH-9Tl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="dWE-HQ-vt1" secondAttribute="trailing" constant="8" id="9nU-am-CKr"/>
-                                        <constraint firstItem="dWE-HQ-vt1" firstAttribute="leading" secondItem="CSY-kk-jCn" secondAttribute="leadingMargin" id="DE9-ZZ-ZAn"/>
-                                        <constraint firstItem="dWE-HQ-vt1" firstAttribute="bottom" secondItem="CSY-kk-jCn" secondAttribute="bottomMargin" id="VUI-xd-Srf"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="CBV-4r-Lup" secondAttribute="bottom" id="8g3-i8-dfW"/>
+                                        <constraint firstItem="CBV-4r-Lup" firstAttribute="leading" secondItem="CSY-kk-jCn" secondAttribute="leadingMargin" id="DyF-Yk-Qmh"/>
+                                        <constraint firstItem="CBV-4r-Lup" firstAttribute="top" secondItem="aAu-ly-RWJ" secondAttribute="bottom" constant="8" id="LTq-C8-Tz9"/>
                                         <constraint firstItem="01i-EH-9Tl" firstAttribute="trailing" secondItem="CSY-kk-jCn" secondAttribute="trailingMargin" id="XY9-rj-TBR"/>
+                                        <constraint firstItem="q2A-hw-zHz" firstAttribute="leading" secondItem="CSY-kk-jCn" secondAttribute="leadingMargin" id="dlM-tN-Qt8"/>
                                         <constraint firstItem="aAu-ly-RWJ" firstAttribute="top" secondItem="CSY-kk-jCn" secondAttribute="topMargin" id="hna-Ia-dfI"/>
                                         <constraint firstItem="01i-EH-9Tl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="aAu-ly-RWJ" secondAttribute="trailing" constant="8" id="hyG-J2-y6g"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="q2A-hw-zHz" secondAttribute="bottom" constant="-8" id="iWl-yg-KoE"/>
                                         <constraint firstItem="aAu-ly-RWJ" firstAttribute="leading" secondItem="CSY-kk-jCn" secondAttribute="leadingMargin" id="imQ-63-9rd"/>
                                         <constraint firstAttribute="centerY" secondItem="01i-EH-9Tl" secondAttribute="centerY" id="uE3-Nm-oNd"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="q2A-hw-zHz" secondAttribute="trailing" id="uaU-yc-hWJ"/>
+                                        <constraint firstItem="01i-EH-9Tl" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="CBV-4r-Lup" secondAttribute="trailing" constant="8" id="xb1-cs-UC0"/>
                                     </constraints>
                                 </tableViewCellContentView>
                             </tableViewCell>
@@ -403,7 +420,6 @@
                     <connections>
                         <outlet property="countDownLabel" destination="ibb-Qm-Wu3" id="y0S-tr-Uz5"/>
                         <outlet property="headerView" destination="2Bw-gf-18V" id="dKO-ls-kVU"/>
-                        <outlet property="progressView" destination="PGh-CT-BMZ" id="6Wa-hg-wJm"/>
                         <outlet property="recordingLabel" destination="oAq-Pi-VMc" id="OMQ-dN-C5Q"/>
                         <outlet property="recordingPV" destination="kX3-cT-AdX" id="uD0-L7-xcj"/>
                         <outlet property="startPauseBtn" destination="MsM-rn-COn" id="QEf-pE-jYr"/>
@@ -442,17 +458,17 @@
                             <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Recoeding 6s" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oAq-Pi-VMc">
+                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Recoeding 0s" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oAq-Pi-VMc">
                             <rect key="frame" x="247" y="88.5" width="105.5" height="20.5"/>
                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <progressView hidden="YES" opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="kX3-cT-AdX">
+                        <progressView hidden="YES" opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kX3-cT-AdX">
                             <rect key="frame" x="0.0" y="116" width="600" height="2"/>
                             <color key="tintColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         </progressView>
-                        <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="PGh-CT-BMZ">
+                        <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PGh-CT-BMZ">
                             <rect key="frame" x="0.0" y="118" width="600" height="2"/>
                         </progressView>
                         <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BDU-Ua-EuM">
@@ -633,4 +649,7 @@
             <point key="canvasLocation" x="2030" y="1810"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="defaultLoadingImage" width="100" height="100"/>
+    </resources>
 </document>
