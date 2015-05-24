@@ -590,7 +590,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     }
  
     NSData *data = [NSData dataWithContentsOfFile:path];
-    PFFile *imageFile = [PFFile fileWithName:[path.lastPathComponent stringByReplacingOccurrencesOfString:path.pathExtension withString:@""] data:data];
+    PFFile *imageFile = [PFFile fileWithName:[path.lastPathComponent stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@".%@", path.pathExtension] withString:@""] data:data];
     [[MPWGlobal sharedInstance].uploadingFiles addObject:imageFile];
     note[@"localURL"] = path;
     note[@"record"] = imageFile;
@@ -744,9 +744,17 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         MDBlockButton *btn = (MDBlockButton *)[cell viewWithTag:4];
         
         if ([notification.userInfo[@"completed"] boolValue]) {
+            NSData *data = notification.userInfo[@"data"];
+            PFFile *file = note[@"record"];
+            NSString *fileName = [[file.name componentsSeparatedByString:@"-"] lastObject];
+            NSString *path = [[[MPWGlobal recordPathForMeeting:self.meeting] stringByAppendingPathComponent:fileName] stringByAppendingPathExtension:@"pcm"];
+            BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:path];
+            if (!exists) {
+                [data writeToFile:path atomically:YES];
+            }
             pv.hidden = YES;
             NSError *error = nil;
-            AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithData:notification.userInfo[@"data"] error:&error];
+            AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithData:data error:&error];
             player.delegate = self;
             self.player = player;
             [player play];
