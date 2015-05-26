@@ -10,11 +10,13 @@
 #import "UIImageView+AFNetworking.h"
 #import "NSString+HHKit.h"
 #import "MRProgress.h"
+#import "MeetingTableViewController.h"
 
 NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCreateTableViewControllerDidFinishCreatingMeeting";
 
 @interface MeetingCreateTableViewController () <UITextFieldDelegate>
-@property (assign, nonatomic) int viewAppearTime, duration;
+@property (assign, nonatomic) int viewAppearTime;
+//@property (assign, nonatomic) int duration;
 @property (strong, nonatomic) NSMutableArray *users;
 @property (strong, nonatomic) UITextField *name, *location;
 @property (strong, nonatomic) UIDatePicker *picker;
@@ -26,7 +28,7 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.duration = 1;
+//    self.duration = 1;
     self.users = [@[@"A", @"B"] mutableCopy];
 }
 
@@ -63,7 +65,7 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
             return 1;
             break;
         case 1:
-            return 4;
+            return 3;
             break;
         case 2:
             return self.users.count + 1;
@@ -96,13 +98,13 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
 {
     switch (section) {
         case 0:
-            return @"What";
+            return @"What [Only needed]";
             break;
         case 1:
-            return @"Where & When";
+            return @"Where & When [Optional]";
             break;
         case 2:
-            return @"Who";
+            return @"Who [Optional]";
             break;
         default:
             break;
@@ -151,19 +153,19 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
                     break;
                 case 3:
                 {
-                    cell = [tableView dequeueReusableCellWithIdentifier:@"StepperCell" forIndexPath:indexPath];
-                    UILabel *title = (UILabel *)[cell viewWithTag:1];
-                    title.text = @"Duration";
-                    UILabel *duration = (UILabel *)[cell viewWithTag:2];
-                    UIStepper *stepper = (UIStepper *)[cell viewWithTag:3];
-                    stepper.minimumValue = 1;
-                    stepper.value = self.duration;
-                    self.stepper = stepper;
-                    if (self.duration > 1) {
-                        duration.text = [NSString stringWithFormat:@"%d hours", self.duration];
-                    } else {
-                        duration.text = [NSString stringWithFormat:@"%d hour", self.duration];
-                    }
+//                    cell = [tableView dequeueReusableCellWithIdentifier:@"StepperCell" forIndexPath:indexPath];
+//                    UILabel *title = (UILabel *)[cell viewWithTag:1];
+//                    title.text = @"Duration";
+//                    UILabel *duration = (UILabel *)[cell viewWithTag:2];
+//                    UIStepper *stepper = (UIStepper *)[cell viewWithTag:3];
+//                    stepper.minimumValue = 1;
+//                    stepper.value = self.duration;
+//                    self.stepper = stepper;
+//                    if (self.duration > 1) {
+//                        duration.text = [NSString stringWithFormat:@"%d hours", self.duration];
+//                    } else {
+//                        duration.text = [NSString stringWithFormat:@"%d hour", self.duration];
+//                    }
                 }
                     break;
                 default:
@@ -261,15 +263,61 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
     }
     meeting[@"createTime"] = [NSDate date];
     meeting[@"begin"] = self.picker.date;
-    meeting[@"duration"] = @(self.duration);
+//    meeting[@"duration"] = @(self.duration);
     [meeting pin];
     [meeting saveEventually];
     [[NSNotificationCenter defaultCenter] postNotificationName:MeetingCreateTableViewControllerDidFinishCreatingMeeting object:meeting];
-    [self.navigationController popViewControllerAnimated:YES];
+    UINavigationController *nav = self.navigationController;
+    [nav popViewControllerAnimated:YES];
+    NSComparisonResult result = [[NSDate date] compare:self.picker.date];
+    if (result == NSOrderedAscending) {
+        result = [[NSDate date] compare:[self.picker.date dateByAddingTimeInterval:-60*15]];
+        if (result == NSOrderedAscending) {
+            UILocalNotification *notification=[[UILocalNotification alloc] init];
+            if (notification!=nil) {
+                
+                notification.fireDate = [self.picker.date dateByAddingTimeInterval:-60*15]; //触发通知的时间
+                notification.repeatInterval = 0; //循环次数，kCFCalendarUnitWeekday一周一次
+                
+                notification.timeZone = [NSTimeZone defaultTimeZone];
+                notification.soundName = UILocalNotificationDefaultSoundName;
+                notification.alertBody = [NSString stringWithFormat:@"%@ will be begun in 15 minutes! please get your self prepared!", self.name.text];
+                
+                notification.alertAction = @"Start preparing";  //提示框按钮
+                notification.hasAction = YES; //是否显示额外的按钮，为no时alertAction消失
+                
+                //            notification.applicationIconBadgeNumber = 1; //设置app图标右上角的数字
+                
+                //下面设置本地通知发送的消息，这个消息可以接受
+                if (meeting.objectId) {
+                    NSDictionary* infoDic = [NSDictionary dictionaryWithObject:@"meetingID" forKey:meeting.objectId];
+                    notification.userInfo = infoDic;
+                }
+                //发送通知
+                [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+            }
+        }
+        else {
+            HHAlertView *alert = [[HHAlertView alloc] initWithTitle:@"Hey!" message:[NSString stringWithFormat:@"%@ will begun soon! please get your self prepared!", self.name.text] cancelButtonTitle:@"Sure" cancelBlock:^{
+                MeetingTableViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"MeetingDetail"];
+                vc.meeting = meeting;
+                [nav pushViewController:vc animated:YES];
+            }];
+            [alert show];
+        }
+    }
+    else {
+        HHAlertView *alert = [[HHAlertView alloc] initWithTitle:@"Hey!" message:[NSString stringWithFormat:@"%@ has begun! please get your self prepared!", self.name.text] cancelButtonTitle:@"Sure" cancelBlock:^{
+            MeetingTableViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"MeetingDetail"];
+            vc.meeting = meeting;
+            [nav pushViewController:vc animated:YES];
+        }];
+        [alert show];
+    }
 }
 
 - (IBAction)stepperValueChanged:(id)sender {
-    self.duration = self.stepper.value;
+    //self.duration = self.stepper.value;
     [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:3 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 

@@ -17,4 +17,6 @@
 
 @property (strong, nonatomic) NSMutableArray *uploadingFiles, *downloadingFiles;
 @property (strong, nonatomic) MPWRecorder *recorder;
+
+@property (strong, nonatomic) NSMutableArray *meetingTimers;
 @end

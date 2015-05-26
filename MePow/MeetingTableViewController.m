@@ -12,6 +12,7 @@
 #import "TextEditingController.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "UIImageView+WebCache.h"
+#import "CountDownPickerViewController.h"
 
 NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControllerDidDeleteMeeting";
 
@@ -20,7 +21,7 @@ NSString *MeetingTableViewControllerRecordUploadPercentChanged = @"MeetingTableV
 NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTableViewControllerRecordDownloadPercentChanged";
 
 
-@interface MeetingTableViewController () <UITextViewDelegate, TextEditingControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, AVAudioRecorderDelegate, AVAudioPlayerDelegate>
+@interface MeetingTableViewController () <UITextViewDelegate, TextEditingControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, AVAudioRecorderDelegate, AVAudioPlayerDelegate, CountDownPickerViewControllerDelegate>
 @property (strong, nonatomic) IBOutlet UIView *headerView;
 @property (strong, nonatomic) IBOutlet UIButton *startPauseBtn;
 @property (strong, nonatomic) IBOutlet UILabel *countDownLabel;
@@ -28,6 +29,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 @property (strong, nonatomic) IBOutlet UILabel *recordingLabel;
 @property (strong, nonatomic) IBOutlet UIProgressView *recordingPV;
 @property (strong, nonatomic) IBOutlet UIProgressView *timerPV;
+@property (strong, nonatomic) NSTimer *timer;
 @property (strong, nonatomic) NSMutableArray *notes;
 @property (strong, nonatomic) EmptyViewController *emptyVC;
 @property (assign, nonatomic) BOOL shouldReload, audioSessionPermitted;
@@ -107,7 +109,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     if (self.shouldReload) {
         self.shouldReload = NO;
         PFQuery *query = [PFQuery queryWithClassName:@"Note"];
-        //[query fromLocalDatastore];
+        [query fromLocalDatastore];
         [query whereKey:@"meeting" equalTo:self.meeting];
         [query orderByAscending:@"createTime"];
         [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
@@ -351,6 +353,11 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     if (originalFile) {
         [[MPWGlobal sharedInstance].uploadingFiles removeObject:originalFile];
     }
+    float rate = 0.5;
+    while (imageData.length > 10485760) {
+        imageData = [[NSData alloc] initWithData:UIImageJPEGRepresentation((image), rate)];
+        rate = rate/2;
+    }
     PFFile *imageFile = [PFFile fileWithName:timeDesc data:imageData];
     [[MPWGlobal sharedInstance].uploadingFiles addObject:imageFile];
     note[@"localURL"] = path;
@@ -501,8 +508,28 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 }
 
 - (IBAction)startPauseBtnPressed:(id)sender {
+    NSArray *statuses = self.meeting[@"status"];
+    if (statuses.count == 0) {
+        UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        CountDownPickerViewController *vc = [sb instantiateViewControllerWithIdentifier:@"CountDown"];
+        vc.delegate = self;
+        [self addChildViewController:vc];
+        vc.view.center = self.view.center;
+        vc.view.backgroundColor = [UIColor colorWithWhite:1 alpha:0.9];
+        [self.view addSubview:vc.view];
+        return;
+    }
+    
+    if (!self.startPauseBtn.selected) {
+
+    }
     self.startPauseBtn.selected = !self.startPauseBtn.selected;
     self.stopBtn.enabled = YES;
+    int startStatus = [self.meeting[@"startStatus"] intValue];
+    if (startStatus) {
+        self.meeting[@"startStatus"] = @1;
+        [self.meeting pin];
+    }
 }
 
 - (IBAction)stopBtnPressed:(id)sender {
@@ -664,6 +691,34 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:YES];
         [self hideEmptyVC];
     }
+}
+
+#pragma mark - CountDownPickerViewController
+- (void)countDownPickerViewController:(CountDownPickerViewController *)controller didFinishWithResult:(NSTimeInterval)time
+{
+    NSLog(@"%.2f", time);
+    int hour = 0;
+    int minute = 0;
+    int second = time;
+    while (second >= 60) {
+        minute = second/60;
+        second = second%60;
+    }
+    while (minute >= 60) {
+        hour = minute/60;
+        minute = minute%60;
+    }
+    
+    self.countDownLabel.text = [NSString stringWithFormat:@"%02d:%02d:%02d", hour, minute, second];
+    NSDictionary *dic = @{@"estimatedTime":@(time)};
+    NSArray *array = @[dic];
+    self.meeting[@"status"] = array;
+    [self.meeting pin];
+    [self.meeting saveEventually];
+    [self startPauseBtnPressed:nil];
+    
+    [controller.view removeFromSuperview];
+    [controller removeFromParentViewController];
 }
 
 #pragma mark - Notifications
