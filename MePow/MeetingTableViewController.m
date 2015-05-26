@@ -40,6 +40,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 @implementation MeetingTableViewController
 - (void)dealloc
 {
+    NSLog(@"DEALLOC");
     _playingNote = nil;
     [_player stop];
     _player = nil;
@@ -75,7 +76,6 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     self.tableView.sectionHeaderHeight = UITableViewAutomaticDimension;
     self.shouldReload = YES;
     self.notes = [NSMutableArray array];
-    
     
     NSArray *statuses = self.meeting[@"status"];
     NSDictionary *lastObject = statuses.lastObject;
@@ -169,7 +169,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         [MPWGlobal sharedInstance].recorder.pv = self.recordingPV;
         [MPWGlobal sharedInstance].recorder.label = self.recordingLabel;
     }
-    
+
     __weak __block typeof(self) weakSelf = self;
     if (self.shouldReload) {
         self.shouldReload = NO;
@@ -471,19 +471,21 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     self.emptyVC.view.frame = frame;
     [self.view addSubview:self.emptyVC.view];
     
+    
+    __weak __block typeof(self) weakSelf = self;
     [self.emptyVC setupWithImage:nil text:@"Take a note or never!" actionHandler:^(EmptyViewController *emptyViewController){
         HHActionSheet *ac = [[HHActionSheet alloc] initWithTitle:@"Choose a note"];
         [ac addButtonWithTitle:@"Text" block:^{
-            [self performSegueWithIdentifier:@"TextEdit" sender:nil];
+            [weakSelf performSegueWithIdentifier:@"TextEdit" sender:nil];
         }];
         [ac addButtonWithTitle:@"Voice" block:^{
-            [self voiceBtnPressed:nil];
+            [weakSelf voiceBtnPressed:nil];
         }];
         [ac addButtonWithTitle:@"Image" block:^{
-            [self imageBtnPressed:nil];
+            [weakSelf imageBtnPressed:nil];
         }];
         [ac addCancelButtonWithTitle:@"Cancel"];
-        [ac showInView:self.view];
+        [ac showInView:weakSelf.view];
     }];
 }
 

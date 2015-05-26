@@ -131,8 +131,9 @@
     [self addChildViewController:self.emptyVC];
     [self.view addSubview:self.emptyVC.view];
     
+    __weak __block typeof(self) weakSelf = self;
     [self.emptyVC setupWithImage:nil text:@"No Meeting yet!\nStart Now!" actionHandler:^(EmptyViewController *emptyViewController){
-        [self performSegueWithIdentifier: @"CreateMeeting" sender: self];
+        [weakSelf performSegueWithIdentifier: @"CreateMeeting" sender: self];
     }];
 }
 
