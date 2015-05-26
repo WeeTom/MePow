@@ -75,6 +75,71 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     self.tableView.sectionHeaderHeight = UITableViewAutomaticDimension;
     self.shouldReload = YES;
     self.notes = [NSMutableArray array];
+    
+    
+    NSArray *statuses = self.meeting[@"status"];
+    NSDictionary *lastObject = statuses.lastObject;
+    if (!lastObject) {
+        self.startPauseBtn.selected = NO;
+        self.stopBtn.enabled = NO;
+    } else {
+        NSString *action = lastObject[@"action"];
+        NSDate *actionDate = lastObject[@"date"];
+        if ([action isEqualToString:@"start"]) {
+            self.startPauseBtn.selected = YES;
+            self.stopBtn.enabled = YES;
+            
+            NSDate *cDate = [NSDate date];
+            NSTimeInterval time = [cDate timeIntervalSinceDate:actionDate];
+
+            NSLog(@"%.2f", time);
+            int hour = 0;
+            int minute = 0;
+            int second = time;
+            while (second >= 60) {
+                minute = second/60;
+                second = second%60;
+            }
+            while (minute >= 60) {
+                hour = minute/60;
+                minute = minute%60;
+            }
+            
+            self.countDownLabel.text = [NSString stringWithFormat:@"%02d:%02d:%02d", hour, minute, second];
+            
+            [self startTimer];
+        } else if ([action isEqualToString:@"pause"]) {
+            self.startPauseBtn.selected = NO;
+            self.stopBtn.enabled = YES;
+
+            NSTimeInterval time = [lastObject[@"time"] doubleValue];
+            NSLog(@"%.2f", time);
+            
+            NSTimeInterval absTime = time;
+            if (absTime < 0) {
+                absTime = -absTime;
+                self.countDownLabel.textColor = [UIColor redColor];
+            }
+            
+            int hour = 0;
+            int minute = 0;
+            int second = absTime;
+            while (second >= 60) {
+                minute = second/60;
+                second = second%60;
+            }
+            while (minute >= 60) {
+                hour = minute/60;
+                minute = minute%60;
+            }
+            
+            self.countDownLabel.text = [NSString stringWithFormat:@"%02d:%02d:%02d", hour, minute, second];
+        } else if ([action isEqualToString:@"stop"]) {
+            self.startPauseBtn.selected = NO;
+            self.stopBtn.enabled = NO;
+        }
+    }
+
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -509,7 +574,8 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 
 - (IBAction)startPauseBtnPressed:(id)sender {
     NSArray *statuses = self.meeting[@"status"];
-    if (statuses.count == 0) {
+    NSDictionary *lastObject = statuses.lastObject;
+    if (!lastObject) {
         UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
         CountDownPickerViewController *vc = [sb instantiateViewControllerWithIdentifier:@"CountDown"];
         vc.delegate = self;
@@ -518,21 +584,84 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         vc.view.backgroundColor = [UIColor colorWithWhite:1 alpha:0.9];
         [self.view addSubview:vc.view];
         return;
-    }
-    
-    if (!self.startPauseBtn.selected) {
-
-    }
-    self.startPauseBtn.selected = !self.startPauseBtn.selected;
-    self.stopBtn.enabled = YES;
-    int startStatus = [self.meeting[@"startStatus"] intValue];
-    if (startStatus) {
-        self.meeting[@"startStatus"] = @1;
-        [self.meeting pin];
+    } else {
+        NSString *action = lastObject[@"action"];
+        NSDate *actionDate = lastObject[@"date"];
+        if ([action isEqualToString:@"start"]) {
+            // pause
+            [self.timer invalidate];
+            self.timer = nil;
+            self.startPauseBtn.selected = NO;
+            self.stopBtn.enabled = YES;
+            NSDate *cDate = [NSDate date];
+            NSTimeInterval time = [lastObject[@"time"] doubleValue];
+            NSTimeInterval timeleft = time - [cDate timeIntervalSinceDate:actionDate];
+            NSMutableArray *newStatuses = [statuses mutableCopy];
+            [newStatuses addObject:@{@"action":@"pause", @"date":cDate, @"time":@(timeleft)}];
+            self.meeting[@"status"] = newStatuses;
+            [self.meeting pin];
+            [self.meeting saveEventually];
+        } else if ([action isEqualToString:@"pause"]) {
+            // start
+            NSTimeInterval time = [lastObject[@"time"] doubleValue];
+            
+            NSMutableArray *newStatuses = [statuses mutableCopy];
+            NSDictionary *dic = @{@"action":@"start",@"time":@(time),@"date":[NSDate date]};
+            [newStatuses addObject:dic];
+            
+            self.meeting[@"status"] = newStatuses;
+            [self.meeting pin];
+            [self.meeting saveEventually];
+            
+            [self startTimer];
+            self.startPauseBtn.selected = YES;
+        } else if ([action isEqualToString:@"stop"]) {
+            // start
+            UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+            CountDownPickerViewController *vc = [sb instantiateViewControllerWithIdentifier:@"CountDown"];
+            vc.delegate = self;
+            [self addChildViewController:vc];
+            vc.view.center = self.view.center;
+            vc.view.backgroundColor = [UIColor colorWithWhite:1 alpha:0.9];
+            [self.view addSubview:vc.view];
+        }
     }
 }
 
 - (IBAction)stopBtnPressed:(id)sender {
+    NSArray *statuses = self.meeting[@"status"];
+    NSDictionary *lastObject = statuses.lastObject;
+    
+    NSString *action = lastObject[@"action"];
+    NSDate *actionDate = lastObject[@"date"];
+    [self.timer invalidate];
+    self.timer = nil;
+    
+    if ([action isEqualToString:@"start"]) {
+        NSDate *cDate = [NSDate date];
+        NSTimeInterval timeleft = [cDate timeIntervalSinceDate:actionDate];
+        NSMutableArray *newStatuses = [statuses mutableCopy];
+        [newStatuses addObject:@{@"action":@"stop", @"date":cDate, @"time":@(timeleft)}];
+        self.meeting[@"status"] = newStatuses;
+        [self.meeting pin];
+        [self.meeting saveEventually];
+    }
+    else if ([action isEqualToString:@"pause"]) {
+        NSTimeInterval time = [lastObject[@"time"] doubleValue];
+        NSLog(@"%.2f", time);
+
+        NSMutableArray *newStatuses = [statuses mutableCopy];
+        NSDictionary *dic = @{@"action":@"stop",@"time":@(time),@"date":[NSDate date]};
+        [newStatuses addObject:dic];
+        
+        self.meeting[@"status"] = newStatuses;
+        [self.meeting pin];
+        [self.meeting saveEventually];
+        
+        self.startPauseBtn.selected = YES;
+    }
+    
+
     self.startPauseBtn.selected = NO;
     self.stopBtn.enabled = NO;
 }
@@ -575,6 +704,53 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         [[NSNotificationCenter defaultCenter] postNotificationName:MeetingTableViewControllerRecordDownloadPercentChanged object:note userInfo:@{@"percentDone":@(percentDone)}];
     }];
     self.playingNote = note;
+}
+
+- (void)startTimer
+{
+    [self stopTimer];
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateLabel) userInfo:nil repeats:YES];
+    [self.timer fire];
+}
+
+- (void)updateLabel
+{
+    NSDictionary *lastObject = [self.meeting[@"status"] lastObject];
+    // it must be action start
+    
+    NSTimeInterval time = [lastObject[@"time"] doubleValue];
+    NSDate *startDate = lastObject[@"date"];
+    NSDate *cDate = [NSDate date];
+    NSTimeInterval timeleft = time - [cDate timeIntervalSinceDate:startDate];
+    NSLog(@"%.2f", timeleft);
+    
+    NSTimeInterval absTimeLeft = timeleft;
+    if (absTimeLeft < 0) {
+        absTimeLeft = - absTimeLeft;
+    }
+    int hour = 0;
+    int minute = 0;
+    int second = absTimeLeft;
+    while (second >= 60) {
+        minute = second/60;
+        second = second%60;
+    }
+    while (minute >= 60) {
+        hour = minute/60;
+        minute = minute%60;
+    }
+    if (timeleft > 0) {
+        self.countDownLabel.textColor = [UIColor blackColor];
+    } else {
+        self.countDownLabel.textColor = [UIColor redColor];
+    }
+    self.countDownLabel.text = [NSString stringWithFormat:@"%02d:%02d:%02d", hour, minute, second];
+}
+
+- (void)stopTimer
+{
+    [self.timer invalidate];
+    self.timer = nil;
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -710,12 +886,20 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     }
     
     self.countDownLabel.text = [NSString stringWithFormat:@"%02d:%02d:%02d", hour, minute, second];
-    NSDictionary *dic = @{@"estimatedTime":@(time)};
-    NSArray *array = @[dic];
-    self.meeting[@"status"] = array;
+    NSMutableArray *newStatuses = [self.meeting[@"status"] mutableCopy];
+    if (!newStatuses) {
+        newStatuses = [NSMutableArray array];
+    }
+    NSDictionary *dic = @{@"action":@"start",@"time":@(time),@"date":[NSDate date]};
+    [newStatuses addObject:dic];
+    
+    self.meeting[@"status"] = newStatuses;
     [self.meeting pin];
     [self.meeting saveEventually];
-    [self startPauseBtnPressed:nil];
+    
+    self.startPauseBtn.selected = YES;
+    self.stopBtn.enabled = YES;
+    [self startTimer];
     
     [controller.view removeFromSuperview];
     [controller removeFromParentViewController];
