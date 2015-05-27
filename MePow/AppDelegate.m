@@ -80,7 +80,9 @@
 {
     switch ([[UIApplication sharedApplication] applicationState]) {
         case UIApplicationStateActive: {
-            HHAlertView *alertView = [[HHAlertView alloc] initWithTitle:@"Alert!" message:notification.alertBody cancelButtonTitle:@"Check Out!" cancelBlock:^{
+            HHAlertView *alertView = [[HHAlertView alloc] initWithTitle:@"Alert!" message:notification.alertBody cancelButtonTitle:@"Later" cancelBlock:^{
+            }];
+            [alertView addButtonWithTitle:@"Check Out!" block:^{
                 PFQuery *query = [PFQuery queryWithClassName:@"Meeting"];
                 [query fromLocalDatastore];
                 [query whereKey:@"objectId" equalTo:notification.userInfo[@"meetingID"]];
@@ -95,7 +97,6 @@
                     }
                     return task;
                 }];
-
             }];
             [alertView show];
         }

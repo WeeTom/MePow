@@ -103,6 +103,10 @@ static MPWGlobal *sharedInstance = nil;
         for (int i = 0; i < 3; i++) {
             UILocalNotification *notification = [[UILocalNotification alloc] init];
             if (notification != nil) {
+                NSComparisonResult result = [[NSDate date] compare:[startDate dateByAddingTimeInterval:timeLeft + 15*60*i]];
+                if (result == NSOrderedDescending) {
+                    continue;
+                }
                 notification.fireDate = [startDate dateByAddingTimeInterval:timeLeft + 15*60*i]; //触发通知的时间
                 notification.repeatInterval = 0; //循环次数，kCFCalendarUnitWeekday一周一次
                 

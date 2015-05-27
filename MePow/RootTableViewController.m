@@ -11,6 +11,8 @@
 #import "HHKit.h"
 #import "MeetingTableViewController.h"
 #import "MeetingCreateTableViewController.h"
+#import "SummaryTableViewController.h"
+
 @interface RootTableViewController () <PFLogInViewControllerDelegate>
 @property (strong, nonatomic) NSMutableArray *meetings;
 @property (strong, nonatomic) EmptyViewController *emptyVC;
@@ -96,7 +98,30 @@
     NSDateFormatter *fm = [[NSDateFormatter alloc] init];
     [fm setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     cell.detailTextLabel.text = [fm stringFromDate:date];
+    
+    if (meeting[@"summary"]) {
+        cell.accessoryType = UITableViewCellAccessoryDetailButton;
+    } else {
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
     return cell;
+}
+
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
+{
+    PFObject *meeting = self.meetings[indexPath.row];
+    PFObject *summary = meeting[@"summary"];
+    if (!summary) {
+        
+    } else {
+        if (summary.isDataAvailable) {
+            [self showSummary:summary];
+        } else {
+            [summary fetch];
+            [self showSummary:summary];
+            // todo
+        }
+    }
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -217,7 +242,7 @@
     [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
         if (task.error) {
             NSLog(@"Error: %@", task.error);
-            [progressView dismiss:YES];
+            [progressView performSelectorOnMainThread:@selector(dismiss:) withObject:@YES waitUntilDone:NO];
             return task;
         }
         
@@ -230,6 +255,21 @@
         [self reloadTableViewWithItems:task.result];
         [progressView performSelectorOnMainThread:@selector(dismiss:) withObject:@YES waitUntilDone:NO];
         return task;
+    }];
+}
+
+- (void)showSummary:(PFObject *)summary
+{
+    if (![[NSThread currentThread] isMainThread]) {
+        [self performSelectorOnMainThread:@selector(showSummary:) withObject:summary waitUntilDone:NO];
+        return;
+    }
+    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    UINavigationController *nav = [sb instantiateViewControllerWithIdentifier:@"SumNC"];
+    SummaryTableViewController *vc = nav.viewControllers.firstObject;
+    vc.summary = summary;
+    vc.title = @"Summary";
+    [self presentViewController:nav animated:YES completion:^{
     }];
 }
 

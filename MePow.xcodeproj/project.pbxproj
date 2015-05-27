@@ -99,6 +99,7 @@
 		F7A36CDF1B09B9B100C57DA6 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7A36CDE1B09B9B100C57DA6 /* Social.framework */; };
 		F7A36CE21B09BA0300C57DA6 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = F7A36CE11B09BA0300C57DA6 /* Configuration.plist */; };
 		F7A36CE51B09BE8800C57DA6 /* EmptyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7A36CE41B09BE8800C57DA6 /* EmptyViewController.m */; };
+		F7FB13E51B15EE2F00E682C5 /* SummaryTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7FB13E41B15EE2F00E682C5 /* SummaryTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -286,6 +287,8 @@
 		F7A36CE31B09BE8800C57DA6 /* EmptyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EmptyViewController.h; path = ../EmptyViewController.h; sourceTree = "<group>"; };
 		F7A36CE41B09BE8800C57DA6 /* EmptyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EmptyViewController.m; path = ../EmptyViewController.m; sourceTree = "<group>"; };
 		F7A5BB841B09C85700689288 /* MePow-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MePow-Prefix.pch"; sourceTree = "<group>"; };
+		F7FB13E31B15EE2F00E682C5 /* SummaryTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SummaryTableViewController.h; sourceTree = "<group>"; };
+		F7FB13E41B15EE2F00E682C5 /* SummaryTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SummaryTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -605,6 +608,8 @@
 				F7A36C921B09B87E00C57DA6 /* Supporting Files */,
 				F76964601B14950000C28E4D /* CountDownPickerViewController.h */,
 				F76964611B14950000C28E4D /* CountDownPickerViewController.m */,
+				F7FB13E31B15EE2F00E682C5 /* SummaryTableViewController.h */,
+				F7FB13E41B15EE2F00E682C5 /* SummaryTableViewController.m */,
 			);
 			path = MePow;
 			sourceTree = "<group>";
@@ -847,6 +852,7 @@
 				F79AB2F31B0DCAD70042CAF0 /* MPWGlobal.m in Sources */,
 				F79AB3931B0DF2E20042CAF0 /* HHTextView.m in Sources */,
 				F79AB3601B0DE3AB0042CAF0 /* UIActivityIndicatorView+AFNetworking.m in Sources */,
+				F7FB13E51B15EE2F00E682C5 /* SummaryTableViewController.m in Sources */,
 				F79C0DE51B10C3A900791CC1 /* SDWebImageManager.m in Sources */,
 				F79AB38E1B0DF2E20042CAF0 /* UIImage+HHKit.m in Sources */,
 				F79AB32A1B0DE3680042CAF0 /* MRActivityIndicatorView+AFNetworking.m in Sources */,

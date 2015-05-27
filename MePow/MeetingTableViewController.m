@@ -13,6 +13,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "UIImageView+WebCache.h"
 #import "CountDownPickerViewController.h"
+#import "SummaryTableViewController.h"
 
 NSString *MeetingTableViewControllerDidDeleteMeeting = @"MeetingTableViewControllerDidDeleteMeeting";
 
@@ -23,6 +24,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 
 @interface MeetingTableViewController () <UITextViewDelegate, TextEditingControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, AVAudioRecorderDelegate, AVAudioPlayerDelegate, CountDownPickerViewControllerDelegate>
 @property (strong, nonatomic) IBOutlet UIView *headerView;
+@property (strong, nonatomic) IBOutlet UIView *summaryHeader;
 @property (strong, nonatomic) IBOutlet UIButton *startPauseBtn;
 @property (strong, nonatomic) IBOutlet UILabel *countDownLabel;
 @property (strong, nonatomic) IBOutlet UIButton *stopBtn;
@@ -30,11 +32,17 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 @property (strong, nonatomic) IBOutlet UIProgressView *recordingPV;
 @property (strong, nonatomic) IBOutlet UIProgressView *timerPV;
 @property (strong, nonatomic) NSTimer *timer;
-@property (strong, nonatomic) NSMutableArray *notes;
+@property (strong, nonatomic) NSMutableArray *notes, *sumNotes;
 @property (strong, nonatomic) EmptyViewController *emptyVC;
-@property (assign, nonatomic) BOOL shouldReload, audioSessionPermitted;
+@property (assign, nonatomic) BOOL shouldReload, audioSessionPermitted, doingSummary;
 @property (strong, nonatomic) PFObject *playingNote;
 @property (strong, nonatomic) AVAudioPlayer *player;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *textItem;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *recordItem;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *stopRecordItem;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *cameraItem;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *actionItem;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *flexibleItem;
 @end
 
 @implementation MeetingTableViewController
@@ -72,7 +80,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     self.tableView.estimatedRowHeight = 200.0;
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
-    self.tableView.estimatedSectionHeaderHeight = 100;
+    self.tableView.estimatedSectionHeaderHeight = 120;
     self.tableView.sectionHeaderHeight = UITableViewAutomaticDimension;
     self.shouldReload = YES;
     self.notes = [NSMutableArray array];
@@ -147,7 +155,8 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     [super viewWillAppear:animated];
     self.navigationController.toolbar.translucent = NO;
     [self.navigationController setToolbarHidden:NO animated:YES];
-    
+    [self resetToolBarItems];
+
     if (!self.audioSessionPermitted) {
         [[AVAudioSession sharedInstance] performSelector:@selector(requestRecordPermission:) withObject:^(BOOL granted) {
             if (granted) {
@@ -210,6 +219,140 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     [super viewWillDisappear:animated];
 }
 
+- (void)resetToolBarItems
+{
+    NSMutableArray *items = [NSMutableArray array];
+    if (self.doingSummary) {
+        MDBlockButton *selectAllBtn = [[MDBlockButton alloc] initWithFrame:CGRectMake(0, 0, 100, 40)];
+        [selectAllBtn setTitle:@"All" forState:UIControlStateNormal];
+        [selectAllBtn setTitle:@"All Selected" forState:UIControlStateSelected];
+        [selectAllBtn setTitleColor:selectAllBtn.tintColor forState:UIControlStateNormal];
+        selectAllBtn.buttonBlock = ^(MDBlockButton *button){
+            button.selected = !button.selected;
+            if (button.selected) {
+                self.sumNotes = [self.notes mutableCopy];
+            } else {
+                [self.sumNotes removeAllObjects];
+            }
+            [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationAutomatic];
+        };
+        UIBarButtonItem *selectAllItem = [[UIBarButtonItem alloc] initWithCustomView:selectAllBtn];
+        [items addObject:selectAllItem];
+        [items addObject:self.flexibleItem];
+        
+        MDBlockButton *doneBtn = [[MDBlockButton alloc] initWithFrame:CGRectMake(0, 0, 100, 40)];
+        [doneBtn setTitle:@"Sum!" forState:UIControlStateNormal];
+        [doneBtn setTitleColor:doneBtn.tintColor forState:UIControlStateNormal];
+        doneBtn.buttonBlock = ^(MDBlockButton *button){
+            if (self.sumNotes.count == 0) {
+                [self.navigationController setNavigationBarHidden:NO animated:YES];
+                self.edgesForExtendedLayout = UIRectEdgeAll;
+                self.doingSummary = NO;
+                [self resetToolBarItems];
+                self.sumNotes = nil;
+                [self.tableView reloadData];
+                return ;
+            }
+            
+            dispatch_block_t goSum = ^{
+                [self.sumNotes sortUsingComparator:^NSComparisonResult(PFObject *s1, PFObject *s2){
+                    return [s1[@"createTime"] compare:s2[@"createTime"]];
+                }];
+                
+                NSMutableString *ms = [[NSMutableString alloc] init];
+                NSMutableArray *records = [NSMutableArray array];
+                NSMutableArray *images = [NSMutableArray array];
+                
+                int order = 1;
+                for (PFObject *object in self.sumNotes) {
+                    if ([object.parseClassName isEqualToString:@"Note"]) {
+                        int type = [object[@"type"] intValue];
+                        switch (type) {
+                            case 0:
+                                [ms appendFormat:@"%d.%@\n\n", order++, object[@"content"]];
+                                break;
+                            case 1:{
+                                PFFile *reocrd = object[@"record"];
+                                if (reocrd) {
+                                    [records addObject:reocrd];
+                                }
+                            }
+                                break;
+                            case 2:{
+                                PFFile *imageFile = object[@"image"];
+                                if (imageFile) {
+                                    [images addObject:imageFile];
+                                }
+                            }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                
+                
+                PFObject *summary = [[PFObject alloc] initWithClassName:@"Summary"];
+                summary[@"content"] = ms;
+                if (records.count > 0) {
+                    summary[@"records"] = records;
+                }
+                if (images.count > 0) {
+                    summary[@"images"] = images;
+                }
+                summary[@"meeting"] = self.meeting;
+                [summary pin];
+                
+                MRProgressOverlayView *progressView = [MRProgressOverlayView showOverlayAddedTo:self.view animated:YES];
+                [progressView show:YES];
+                [summary saveInBackgroundWithBlock:^(BOOL succeeded, NSError *error){
+                    if (error) {
+                        NSLog(@"Error: %@", error);
+                        [progressView performSelectorOnMainThread:@selector(dismiss:) withObject:@YES waitUntilDone:NO];
+                        return ;
+                    }
+                    self.meeting[@"summary"] = summary;
+                    [self.meeting pin];
+                    [self.meeting saveEventually];
+                    
+                    [self showSummary:summary];
+                    [progressView performSelectorOnMainThread:@selector(dismiss:) withObject:@YES waitUntilDone:NO];
+                }];
+            };
+            if (self.meeting[@"summary"]) {
+                HHActionSheet *as = [[HHActionSheet alloc] initWithTitle:@"Already have Summary!"];
+                [as addButtonWithTitle:@"Checkout" block:^{
+                    [self showSummary:self.meeting[@"summary"]];
+                }];
+                [as addDestructiveButtonWithTitle:@"Sum another(will replace the old one)" block:^{
+                    goSum();
+                }];
+                [as addCancelButtonWithTitle:@"Cancel"];
+                [as showInView:self.view];
+            } else {
+                goSum();
+            }
+        };
+        UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithCustomView:doneBtn];
+        [items addObject:doneItem];
+    } else {
+        [items addObject:self.flexibleItem];
+        [items addObject:self.textItem];
+        [items addObject:self.flexibleItem];
+        if ([[MPWGlobal sharedInstance].recorder.meeting isEqual:self.meeting]) {
+            [items addObject:self.stopRecordItem];
+        } else {
+            [items addObject:self.recordItem];
+        }
+        [items addObject:self.flexibleItem];
+        [items addObject:self.cameraItem];
+        [items addObject:self.flexibleItem];
+        [items addObject:self.actionItem];
+        [items addObject:self.flexibleItem];
+    }
+    [self setToolbarItems:items animated:YES];
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -227,11 +370,15 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
+    if (self.doingSummary) {
+        return self.summaryHeader;
+    }
     return self.headerView;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     PFObject *note = self.notes[indexPath.row];
+    BOOL selectedToSum = [self.sumNotes containsObject:note];
     __weak __block typeof(self) weakSelf = self;
 
     NSDateFormatter *fm = [[NSDateFormatter alloc] init];
@@ -244,7 +391,11 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         
         UILabel *label2 = (UILabel *)[cell viewWithTag:2];
         label2.text = [fm stringFromDate:note[@"createTime"]];
-        
+        if (selectedToSum) {
+            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        } else {
+            cell.accessoryType = UITableViewCellAccessoryNone;
+        }
         return cell;
     } else if (type == 1) {
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"NoteVoiceCell" forIndexPath:indexPath];
@@ -278,6 +429,11 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         } else {
             pv.hidden = YES;
 //            PFFile *file = note[@"image"];
+        }
+        if (selectedToSum) {
+            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        } else {
+            cell.accessoryType = UITableViewCellAccessoryNone;
         }
         return cell;
     } else if (type == 2) {
@@ -322,6 +478,11 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
                 }
             }];
         }
+        if (selectedToSum) {
+            cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        } else {
+            cell.accessoryType = UITableViewCellAccessoryNone;
+        }
         return cell;
     }
 
@@ -330,7 +491,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    return YES;
+    return !self.doingSummary;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -352,22 +513,35 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     PFObject *note = self.notes[indexPath.row];
-    int type = [note[@"type"] intValue];
-    if (type == 0) {
-        
-    } else if (type == 1) {
-    
-    } else if (type == 2) {
-        if (![note[@"failed"] boolValue]) {
-            return;
+    if (self.doingSummary) {
+        if ([self.sumNotes containsObject:note]) {
+            [self.sumNotes removeObject:note];
+        } else {
+            [self.sumNotes addObject:note];
         }
-        NSString *localPath = note[@"localURL"];
-        NSURL *fileURL = [NSURL fileURLWithPath:localPath];
-        UIImage *image = [UIImage imageWithContentsOfFile:fileURL.path];
-        if (!image) {
-            image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:fileURL.absoluteString];
+        [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+    } else {
+        int type = [note[@"type"] intValue];
+        if (type == 0) {
+            
+        } else if (type == 1) {
+            if (![note[@"failed"] boolValue]) {
+                return;
+            }
+            
+            [self saveRecordForNote:note recordPath:note[@"localURL"]];
+        } else if (type == 2) {
+            if (![note[@"failed"] boolValue]) {
+                return;
+            }
+            NSString *localPath = note[@"localURL"];
+            NSURL *fileURL = [NSURL fileURLWithPath:localPath];
+            UIImage *image = [UIImage imageWithContentsOfFile:fileURL.path];
+            if (!image) {
+                image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:fileURL.absoluteString];
+            }
+            [self saveImageForNote:note image:image];
         }
-        [self saveImageForNote:note image:image];
     }
 }
 
@@ -768,6 +942,41 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+- (IBAction)exportBtnPressed:(id)sender {
+    if (self.notes.count == 0) {
+        // todo show error
+        return;
+    }
+    
+    self.sumNotes = [NSMutableArray array];
+    self.edgesForExtendedLayout = UIRectEdgeNone;
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+    self.doingSummary = YES;
+    [self.tableView reloadData];
+    [self resetToolBarItems];
+}
+
+- (void)showSummary:(PFObject *)summary
+{
+    if (![[NSThread currentThread] isMainThread]) {
+        [self performSelectorOnMainThread:@selector(showSummary:) withObject:summary waitUntilDone:NO];
+        return;
+    }
+    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    UINavigationController *nav = [sb instantiateViewControllerWithIdentifier:@"SumNC"];
+    SummaryTableViewController *vc = nav.viewControllers.firstObject;
+    vc.summary = summary;
+    vc.title = @"Summary";
+    [self presentViewController:nav animated:YES completion:^{
+        [self.navigationController setNavigationBarHidden:NO animated:YES];
+        self.edgesForExtendedLayout = UIRectEdgeAll;
+        self.doingSummary = NO;
+        [self resetToolBarItems];
+        self.sumNotes = nil;
+        [self.tableView reloadData];
+    }];
+}
+
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([segue.identifier isEqualToString:@"TextEdit"]) {
@@ -1024,7 +1233,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
                 [fm setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
                 label2.text = [fm stringFromDate:note[@"createTime"]];
                 label2.textColor = [UIColor lightGrayColor];
-                int percentDone = [note[@"percentDone"] intValue];
+                int percentDone = [notification.userInfo[@"percentDone"] intValue];
                 pv.hidden = NO;
                 pv.progress = percentDone/100.0;
             }
