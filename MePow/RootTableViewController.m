@@ -60,6 +60,9 @@
             }
             
             for (PFObject *object in (NSArray *)task.result) {
+                if (![MPWGlobal scheduledNotificationExistsForMeeting:object type:1]) {
+                    [MPWGlobal scheduleNotificationForMeeting:object type:1];
+                }
                 [object pin];
             }
             [self reloadTableViewWithItems:task.result];
@@ -110,10 +113,15 @@
         HHActionSheet *actionSheet = [[HHActionSheet alloc] initWithTitle:@"This action can not be undone"];
         [actionSheet addDestructiveButtonWithTitle:@"Yes, delete it" block:^{
             PFObject *meeting = self.meetings[indexPath.row];
+            [MPWGlobal cancelNotificationForMeeting:meeting type:0];
+            [MPWGlobal cancelNotificationForMeeting:meeting type:1];
             [meeting unpin];
             [meeting deleteEventually];
             [self.meetings removeObjectAtIndex:indexPath.row];
             [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            if (self.meetings.count == 0) {
+                [self showEmptyVC];
+            }
         }];
         [actionSheet addCancelButtonWithTitle:@"No, keep it"];
         [actionSheet showInView:self.view];
@@ -214,6 +222,9 @@
         }
         
         for (PFObject *object in (NSArray *)task.result) {
+            if (![MPWGlobal scheduledNotificationExistsForMeeting:object type:1]) {
+                [MPWGlobal scheduleNotificationForMeeting:object type:1];
+            }
             [object pin];
         }
         [self reloadTableViewWithItems:task.result];

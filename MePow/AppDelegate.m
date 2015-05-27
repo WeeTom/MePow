@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "MeetingTableViewController.h"
 
 @interface AppDelegate ()
 
@@ -73,5 +74,68 @@
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     [PFPush handlePush:userInfo];
+}
+
+- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
+{
+    switch ([[UIApplication sharedApplication] applicationState]) {
+        case UIApplicationStateActive: {
+            HHAlertView *alertView = [[HHAlertView alloc] initWithTitle:@"Alert!" message:notification.alertBody cancelButtonTitle:@"Check Out!" cancelBlock:^{
+                PFQuery *query = [PFQuery queryWithClassName:@"Meeting"];
+                [query fromLocalDatastore];
+                [query whereKey:@"objectId" equalTo:notification.userInfo[@"meetingID"]];
+                [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
+                    if (task.error) {
+                        return task;
+                    }
+                    
+                    PFObject *meeting = [task.result lastObject];
+                    if ([meeting isKindOfClass:[PFObject class]]) {
+                        [self showMeeting:meeting];
+                    }
+                    return task;
+                }];
+
+            }];
+            [alertView show];
+        }
+            break;
+        default: {
+            PFQuery *query = [PFQuery queryWithClassName:@"Meeting"];
+            [query fromLocalDatastore];
+            [query whereKey:@"objectId" equalTo:notification.userInfo[@"meetingID"]];
+            [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
+                if (task.error) {
+                    return task;
+                }
+                
+                PFObject *meeting = [task.result lastObject];
+                if ([meeting isKindOfClass:[PFObject class]]) {
+                    [self showMeeting:meeting];
+                }
+                return task;
+            }];
+        }
+            break;
+    }
+}
+
+- (void)showMeeting:(PFObject *)meeting
+{
+    if (![[NSThread currentThread] isMainThread]) {
+        [self performSelectorOnMainThread:@selector(showMeeting:) withObject:meeting waitUntilDone:NO];
+        return;
+    }
+    UINavigationController *nav = (UINavigationController *)self.window.rootViewController;
+    UIViewController *lastVC = nav.viewControllers.lastObject;
+    MeetingTableViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"MeetingDetail"];
+    vc.meeting = meeting;
+    if ([lastVC isKindOfClass:[MeetingTableViewController class]]) {
+        MeetingTableViewController *lastMTVC = (MeetingTableViewController *)lastVC;
+        [lastMTVC stopTimer];
+        [nav replaceVisibleViewController:vc];
+    } else {
+        [nav pushViewController:vc animated:YES];
+    }
 }
 @end

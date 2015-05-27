@@ -516,6 +516,8 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 - (IBAction)trashBtnPressed:(id)sender {
     HHActionSheet *actionSheet = [[HHActionSheet alloc] initWithTitle:@"This action can not be undone"];
     [actionSheet addDestructiveButtonWithTitle:@"Yes, delete it" block:^{
+        [MPWGlobal cancelNotificationForMeeting:self.meeting type:0];
+        [MPWGlobal cancelNotificationForMeeting:self.meeting type:1];
         [self.meeting unpin];
         [self.meeting deleteEventually];
         [[NSNotificationCenter defaultCenter] postNotificationName:MeetingTableViewControllerDidDeleteMeeting object:self.meeting];
@@ -591,8 +593,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         NSDate *actionDate = lastObject[@"date"];
         if ([action isEqualToString:@"start"]) {
             // pause
-            [self.timer invalidate];
-            self.timer = nil;
+            [self stopTimer];
             self.startPauseBtn.selected = NO;
             self.stopBtn.enabled = YES;
             NSDate *cDate = [NSDate date];
@@ -603,6 +604,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
             self.meeting[@"status"] = newStatuses;
             [self.meeting pin];
             [self.meeting saveEventually];
+            [MPWGlobal cancelNotificationForMeeting:self.meeting type:1];
         } else if ([action isEqualToString:@"pause"]) {
             // start
             NSTimeInterval time = [lastObject[@"time"] doubleValue];
@@ -617,6 +619,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
             
             [self startTimer];
             self.startPauseBtn.selected = YES;
+            [MPWGlobal cancelNotificationForMeeting:self.meeting type:1];
         } else if ([action isEqualToString:@"stop"]) {
             // start
             UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
@@ -636,8 +639,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     
     NSString *action = lastObject[@"action"];
     NSDate *actionDate = lastObject[@"date"];
-    [self.timer invalidate];
-    self.timer = nil;
+    [self stopTimer];
     
     if ([action isEqualToString:@"start"]) {
         NSDate *cDate = [NSDate date];
@@ -711,6 +713,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 - (void)startTimer
 {
     [self stopTimer];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Back" style:UIBarButtonItemStylePlain target:self action:@selector(stopTimerAndPop)];
     self.timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateLabel) userInfo:nil repeats:YES];
     [self.timer fire];
 }
@@ -727,9 +730,11 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     NSLog(@"%.2f", timeleft);
     
     NSTimeInterval absTimeLeft = timeleft;
+    
     if (absTimeLeft < 0) {
         absTimeLeft = - absTimeLeft;
     }
+    
     int hour = 0;
     int minute = 0;
     int second = absTimeLeft;
@@ -741,6 +746,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         hour = minute/60;
         minute = minute%60;
     }
+    
     if (timeleft > 0) {
         self.countDownLabel.textColor = [UIColor blackColor];
     } else {
@@ -751,8 +757,15 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 
 - (void)stopTimer
 {
+    self.navigationItem.leftBarButtonItem = self.navigationItem.backBarButtonItem;
     [self.timer invalidate];
     self.timer = nil;
+}
+
+- (void)stopTimerAndPop
+{
+    [self stopTimer];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -902,7 +915,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     self.startPauseBtn.selected = YES;
     self.stopBtn.enabled = YES;
     [self startTimer];
-    
+    [MPWGlobal scheduleNotificationForMeeting:self.meeting type:1];
     [controller.view removeFromSuperview];
     [controller removeFromParentViewController];
 }

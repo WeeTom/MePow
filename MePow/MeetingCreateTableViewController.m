@@ -273,29 +273,7 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
     if (result == NSOrderedAscending) {
         result = [[NSDate date] compare:[self.picker.date dateByAddingTimeInterval:-60*15]];
         if (result == NSOrderedAscending) {
-            UILocalNotification *notification=[[UILocalNotification alloc] init];
-            if (notification!=nil) {
-                
-                notification.fireDate = [self.picker.date dateByAddingTimeInterval:-60*15]; //触发通知的时间
-                notification.repeatInterval = 0; //循环次数，kCFCalendarUnitWeekday一周一次
-                
-                notification.timeZone = [NSTimeZone defaultTimeZone];
-                notification.soundName = UILocalNotificationDefaultSoundName;
-                notification.alertBody = [NSString stringWithFormat:@"%@ will be begun in 15 minutes! please get your self prepared!", self.name.text];
-                
-                notification.alertAction = @"Start preparing";  //提示框按钮
-                notification.hasAction = YES; //是否显示额外的按钮，为no时alertAction消失
-                
-                //            notification.applicationIconBadgeNumber = 1; //设置app图标右上角的数字
-                
-                //下面设置本地通知发送的消息，这个消息可以接受
-                if (meeting.objectId) {
-                    NSDictionary* infoDic = [NSDictionary dictionaryWithObject:@"meetingID" forKey:meeting.objectId];
-                    notification.userInfo = infoDic;
-                }
-                //发送通知
-                [[UIApplication sharedApplication] scheduleLocalNotification:notification];
-            }
+            [MPWGlobal scheduleNotificationForMeeting:meeting type:0];
         }
         else {
             HHAlertView *alert = [[HHAlertView alloc] initWithTitle:@"Hey!" message:[NSString stringWithFormat:@"%@ will begun soon! please get your self prepared!", self.name.text] cancelButtonTitle:@"Sure" cancelBlock:^{

@@ -12,4 +12,5 @@ extern NSString *MeetingTableViewControllerDidDeleteMeeting;
 
 @interface MeetingTableViewController : UITableViewController
 @property (strong, nonatomic) PFObject *meeting;
+- (void)stopTimer;
 @end
