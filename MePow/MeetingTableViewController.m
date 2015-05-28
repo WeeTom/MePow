@@ -638,7 +638,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     
     
     __weak __block typeof(self) weakSelf = self;
-    [self.emptyVC setupWithImage:nil text:@"Take a note or never!" actionHandler:^(EmptyViewController *emptyViewController){
+    [self.emptyVC setupWithImage:nil text:@"Take a note or NERVER!" actionHandler:^(EmptyViewController *emptyViewController){
         HHActionSheet *ac = [[HHActionSheet alloc] initWithTitle:@"Choose a note"];
         [ac addButtonWithTitle:@"Text" block:^{
             [weakSelf performSegueWithIdentifier:@"TextEdit" sender:nil];

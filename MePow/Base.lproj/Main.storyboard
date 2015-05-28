@@ -44,6 +44,7 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Settings" id="7Bt-Fx-lqS">
                         <barButtonItem key="leftBarButtonItem" systemItem="done" id="Kpa-ov-RtD">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="doneBtnPressed:" destination="oCd-Ws-zLD" id="uG7-bz-691"/>
                             </connections>
@@ -92,21 +93,16 @@
                             <outlet property="delegate" destination="Rx5-RA-wp8" id="MbW-e8-edE"/>
                         </connections>
                     </tableView>
-                    <toolbarItems>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="5an-hj-DsV"/>
-                        <barButtonItem title="明" style="done" id="UPR-NC-Jg5">
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="MePow" id="nQF-ay-8Qe">
+                        <barButtonItem key="leftBarButtonItem" title="Social" style="done" id="UPR-NC-Jg5">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <segue destination="HII-Up-qPF" kind="presentation" id="0dp-11-vlN"/>
                             </connections>
                         </barButtonItem>
-                    </toolbarItems>
-                    <navigationItem key="navigationItem" title="MePow" id="nQF-ay-8Qe">
-                        <barButtonItem key="leftBarButtonItem" systemItem="refresh" id="mtw-7E-37r">
-                            <connections>
-                                <action selector="reloadBtnPressed:" destination="Rx5-RA-wp8" id="fDb-WM-aAe"/>
-                            </connections>
-                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="sJs-zW-2dr">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <segue destination="9Gq-XA-rNh" kind="show" identifier="CreateMeeting" id="gGI-2N-99W"/>
                             </connections>
@@ -248,6 +244,7 @@
                                     <subviews>
                                         <button opaque="NO" userInteractionEnabled="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="contactAdd" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FOl-2a-hWA">
                                             <rect key="frame" x="8" y="11" width="22" height="22"/>
+                                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <state key="normal">
                                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                             </state>
@@ -286,6 +283,7 @@
                                         </label>
                                         <stepper opaque="NO" tag="3" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" maximumValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="054-3a-aEb">
                                             <rect key="frame" x="498" y="7" width="94" height="29"/>
+                                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <connections>
                                                 <action selector="stepperValueChanged:" destination="9Gq-XA-rNh" eventType="valueChanged" id="uav-iE-GZt"/>
                                             </connections>
@@ -311,6 +309,7 @@
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Start" id="r02-eY-CFg">
                         <barButtonItem key="rightBarButtonItem" systemItem="save" id="R2N-1B-ksQ">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="saveBtnPressed:" destination="9Gq-XA-rNh" id="UlC-3V-m7N"/>
                             </connections>
@@ -429,6 +428,7 @@
                                         </progressView>
                                         <button opaque="NO" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="01i-EH-9Tl" customClass="MDBlockButton">
                                             <rect key="frame" x="542" y="10" width="50" height="38"/>
+                                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
                                             <state key="normal" title="Play">
                                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -461,6 +461,7 @@
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Title" id="R4O-2H-cXP">
                         <barButtonItem key="rightBarButtonItem" systemItem="trash" id="xCj-Iw-36a">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="trashBtnPressed:" destination="ux3-MK-QJR" id="ns2-cb-1v0"/>
                             </connections>
@@ -494,26 +495,31 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="WUf-ui-DWu" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <barButtonItem systemItem="compose" id="2EF-zk-39e">
+                    <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <connections>
                         <segue destination="r4X-vm-lh6" kind="presentation" identifier="TextEdit" modalTransitionStyle="crossDissolve" id="fWd-E1-UMm"/>
                     </connections>
                 </barButtonItem>
                 <barButtonItem systemItem="play" id="xXT-iU-BbQ">
+                    <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <connections>
                         <action selector="voiceBtnPressed:" destination="ux3-MK-QJR" id="ggP-r2-ZwL"/>
                     </connections>
                 </barButtonItem>
                 <barButtonItem systemItem="done" id="luM-Nd-puW" userLabel="Stop">
+                    <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <connections>
                         <action selector="voiceBtnPressed:" destination="ux3-MK-QJR" id="2cj-1Q-ikC"/>
                     </connections>
                 </barButtonItem>
                 <barButtonItem systemItem="camera" id="Ow6-sM-qVl">
+                    <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <connections>
                         <action selector="imageBtnPressed:" destination="ux3-MK-QJR" id="9Xk-md-oJK"/>
                     </connections>
                 </barButtonItem>
                 <barButtonItem systemItem="action" id="pyw-Uu-32p">
+                    <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <connections>
                         <action selector="exportBtnPressed:" destination="ux3-MK-QJR" id="FKs-Oa-WDz"/>
                     </connections>
@@ -523,10 +529,38 @@
                     <rect key="frame" x="0.0" y="0.0" width="600" height="120"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <subviews>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select NOTES you want to add to your SUMMARY" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aZc-qJ-puV">
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" usesAttributedText="YES" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aZc-qJ-puV">
                             <rect key="frame" x="106" y="89" width="389" height="21"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            <attributedString key="attributedText">
+                                <fragment content="Select ">
+                                    <attributes>
+                                        <color key="NSColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                        <font key="NSFont" size="17" name="HelveticaNeue"/>
+                                        <paragraphStyle key="NSParagraphStyle" alignment="right" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
+                                    </attributes>
+                                </fragment>
+                                <fragment content="NOTES">
+                                    <attributes>
+                                        <color key="NSColor" red="0.0" green="0.44313725490196076" blue="0.73725490196078436" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <font key="NSFont" size="17" name="HelveticaNeue"/>
+                                        <paragraphStyle key="NSParagraphStyle" alignment="right" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
+                                    </attributes>
+                                </fragment>
+                                <fragment content=" you want to add to your ">
+                                    <attributes>
+                                        <color key="NSColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                        <font key="NSFont" size="17" name="HelveticaNeue"/>
+                                        <paragraphStyle key="NSParagraphStyle" alignment="right" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
+                                    </attributes>
+                                </fragment>
+                                <fragment content="SUMMARY">
+                                    <attributes>
+                                        <color key="NSColor" red="0.0" green="0.44313725490196076" blue="0.73725490196078436" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <font key="NSFont" size="17" name="HelveticaNeue"/>
+                                        <paragraphStyle key="NSParagraphStyle" alignment="right" lineBreakMode="wordWrapping" baseWritingDirection="natural"/>
+                                    </attributes>
+                                </fragment>
+                            </attributedString>
                             <nil key="highlightedColor"/>
                         </label>
                         <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="w99-mk-UOQ">
@@ -564,6 +598,7 @@
                         </label>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MsM-rn-COn">
                             <rect key="frame" x="8" y="41" width="53" height="38"/>
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
                             <state key="normal" title="Start">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -594,6 +629,7 @@
                         </progressView>
                         <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BDU-Ua-EuM">
                             <rect key="frame" x="539" y="41" width="53" height="38"/>
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
                             <state key="normal" title="Stop">
                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -678,6 +714,7 @@
                     <toolbarItems>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="Agq-oI-wec"/>
                         <barButtonItem systemItem="done" id="eJU-bb-7Xc">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="doneBtnPressed:" destination="B8q-gv-yzm" id="PNB-QK-dwd"/>
                             </connections>
@@ -685,6 +722,7 @@
                     </toolbarItems>
                     <navigationItem key="navigationItem" title="Add Users" id="24N-cI-LCO">
                         <barButtonItem key="rightBarButtonItem" systemItem="done" id="jUR-1L-STf">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="doneBtnPressed:" destination="B8q-gv-yzm" id="uxJ-GK-p6m"/>
                             </connections>
@@ -743,6 +781,7 @@
                                         </progressView>
                                         <button opaque="NO" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4j3-GT-cIa" customClass="MDBlockButton">
                                             <rect key="frame" x="542" y="10" width="50" height="38"/>
+                                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
                                             <state key="normal" title="Play">
                                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -809,12 +848,14 @@
                     </tableView>
                     <toolbarItems>
                         <barButtonItem systemItem="trash" id="gSK-hi-TuM">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="trash:" destination="0x7-b1-WJn" id="LSo-Fd-9EL"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="PAl-lE-yHw"/>
                         <barButtonItem systemItem="action" id="WNS-OG-qtZ">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="share:" destination="0x7-b1-WJn" id="1Fk-JA-1rF"/>
                             </connections>
@@ -822,11 +863,13 @@
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="8lA-zE-K0J">
                         <barButtonItem key="leftBarButtonItem" systemItem="done" id="Q3X-Gg-XJ2">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="doneBtnPressed:" destination="0x7-b1-WJn" id="3dn-ZG-MYM"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="edit" id="CUM-bA-HTd">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="editBtnPressed:" destination="0x7-b1-WJn" id="jpK-cR-NJg"/>
                                 <segue destination="r4X-vm-lh6" kind="presentation" identifier="SumEdit" id="dCP-PK-HLU"/>
@@ -874,11 +917,13 @@
                     </view>
                     <navigationItem key="navigationItem" title="Add text" id="WFp-SQ-GIf">
                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="BY3-Sq-pHU">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="cancel:" destination="7O9-6s-bXd" id="9Ns-6N-WY4"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="save" id="Ckw-7z-Eck">
+                            <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="save:" destination="7O9-6s-bXd" id="Kfa-eF-K5I"/>
                             </connections>
@@ -913,7 +958,7 @@
                                     <action selector="anywhereClicked:" destination="rWc-kH-IKH" eventType="touchUpInside" id="Nkm-vg-Fys"/>
                                 </connections>
                             </button>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="7MC-x8-cuN">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="7MC-x8-cuN">
                                 <rect key="frame" x="250" y="250" width="100" height="100"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="Iaw-ku-mx9"/>
@@ -923,7 +968,7 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Pno-QD-go4">
                                 <rect key="frame" x="279" y="358" width="42" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="textColor" red="0.0" green="0.44313725490196076" blue="0.73725490196078436" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
@@ -971,6 +1016,7 @@
                             </datePicker>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OPd-yq-g9g">
                                 <rect key="frame" x="275" y="389" width="50" height="38"/>
+                                <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
                                 <state key="normal" title="Pick">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -981,6 +1027,7 @@
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vL6-ym-1uv">
                                 <rect key="frame" x="266" y="435" width="68" height="38"/>
+                                <color key="tintColor" red="0.0" green="0.4431372549" blue="0.73725490199999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
                                 <state key="normal" title="Cancel">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -1114,9 +1161,10 @@
     </scenes>
     <resources>
         <image name="defaultLoadingImage" width="100" height="100"/>
+        <image name="logo" width="64" height="64"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="0dp-11-vlN"/>
+        <segue reference="rfQ-Zp-QVT"/>
         <segue reference="dCP-PK-HLU"/>
     </inferredMetricsTieBreakers>
 </document>

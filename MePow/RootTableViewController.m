@@ -13,11 +13,12 @@
 #import "MeetingCreateTableViewController.h"
 #import "SummaryTableViewController.h"
 #import "MDAPICategory.h"
+#import "MPWLogInViewController.h"
 
 @interface RootTableViewController () <PFLogInViewControllerDelegate>
 @property (strong, nonatomic) NSMutableArray *meetings;
 @property (strong, nonatomic) EmptyViewController *emptyVC;
-@property (assign, nonatomic) BOOL shouldReload;
+@property (assign, nonatomic) BOOL shouldReload, loaded;
 @end
 
 @implementation RootTableViewController
@@ -31,9 +32,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.shouldReload = YES;
-    
+    self.navigationController.toolbar.translucent = NO;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(meetingDeleted:) name:MeetingTableViewControllerDidDeleteMeeting object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(meetingCreated:) name:MeetingCreateTableViewControllerDidFinishCreatingMeeting object:nil];
+    
+    UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 44, 30)];
+    iv.contentMode = UIViewContentModeScaleAspectFit;
+    iv.image = [UIImage imageNamed:@"logo"];
+    self.navigationItem.titleView = iv;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -41,8 +47,12 @@
     [super viewDidAppear:animated];
     
     PFUser *user = [PFUser currentUser];
-    if (!user) {
-        PFLogInViewController *logInController = [[PFLogInViewController alloc] init];
+    if (!user) { 
+        MPWLogInViewController *logInController = [[MPWLogInViewController alloc] init];
+        logInController.fields = (PFLogInFieldsUsernameAndPassword
+                                  | PFLogInFieldsLogInButton
+                                  | PFLogInFieldsSignUpButton
+                                  | PFLogInFieldsPasswordForgotten);
         logInController.delegate = self;
         [self presentViewController:logInController animated:YES completion:nil];
         self.shouldReload = NO;
@@ -55,25 +65,30 @@
     
     if (self.shouldReload) {
         self.shouldReload = NO;
-        PFQuery *query = [PFQuery queryWithClassName:@"Meeting"];
-        [query fromLocalDatastore];
-        [query whereKey:@"creator" equalTo:user];
-        [query orderByDescending:@"begin"];
-        [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
-            if (task.error) {
-                NSLog(@"Error: %@", task.error);
-                return task;
-            }
-            
-            for (PFObject *object in (NSArray *)task.result) {
-                if (![MPWGlobal scheduledNotificationExistsForMeeting:object type:1]) {
-                    [MPWGlobal scheduleNotificationForMeeting:object type:1];
+        if (!self.loaded) {
+            self.loaded = YES;
+            [self reloadBtnPressed:nil];
+        } else {
+            PFQuery *query = [PFQuery queryWithClassName:@"Meeting"];
+            [query fromLocalDatastore];
+            [query whereKey:@"creator" equalTo:user];
+            [query orderByDescending:@"begin"];
+            [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
+                if (task.error) {
+                    NSLog(@"Error: %@", task.error);
+                    return task;
                 }
-                [object pin];
-            }
-            [self reloadTableViewWithItems:task.result];
-            return task;
-        }];
+                
+                for (PFObject *object in (NSArray *)task.result) {
+                    if (![MPWGlobal scheduledNotificationExistsForMeeting:object type:1]) {
+                        [MPWGlobal scheduleNotificationForMeeting:object type:1];
+                    }
+                    [object pin];
+                }
+                [self reloadTableViewWithItems:task.result];
+                return task;
+            }];
+        }
     }
     else {
         [self.tableView reloadData];
@@ -172,7 +187,7 @@
     [self.view addSubview:self.emptyVC.view];
     
     __weak __block typeof(self) weakSelf = self;
-    [self.emptyVC setupWithImage:nil text:@"No Meeting yet!\nStart Now!" actionHandler:^(EmptyViewController *emptyViewController){
+    [self.emptyVC setupWithImage:nil text:@"No Meeting yet!\nStart NOW!" actionHandler:^(EmptyViewController *emptyViewController){
         [weakSelf performSegueWithIdentifier: @"CreateMeeting" sender: self];
     }];
 }

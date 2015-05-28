@@ -59,6 +59,8 @@
 		F718C3F01B16DE770038F851 /* UserListVC.m in Sources */ = {isa = PBXBuildFile; fileRef = F718C3EF1B16DE770038F851 /* UserListVC.m */; };
 		F718C3F41B16E37D0038F851 /* pinyin.c in Sources */ = {isa = PBXBuildFile; fileRef = F718C3F21B16E37D0038F851 /* pinyin.c */; };
 		F718C3F61B16F4740038F851 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F718C3F51B16F4740038F851 /* MessageUI.framework */; };
+		F718C3F91B1728EB0038F851 /* MPWLogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F718C3F81B1728EB0038F851 /* MPWLogInViewController.m */; };
+		F718C3FC1B1729C60038F851 /* MPWSignUpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F718C3FB1B1729C60038F851 /* MPWSignUpViewController.m */; };
 		F76964621B14950000C28E4D /* CountDownPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F76964611B14950000C28E4D /* CountDownPickerViewController.m */; };
 		F79942FC1B0EC0F300161E77 /* MeetingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F79942FB1B0EC0F300161E77 /* MeetingTableViewController.m */; };
 		F79AB2F31B0DCAD70042CAF0 /* MPWGlobal.m in Sources */ = {isa = PBXBuildFile; fileRef = F79AB2F21B0DCAD70042CAF0 /* MPWGlobal.m */; };
@@ -265,6 +267,10 @@
 		F718C3F21B16E37D0038F851 /* pinyin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pinyin.c; sourceTree = "<group>"; };
 		F718C3F31B16E37D0038F851 /* pinyin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pinyin.h; sourceTree = "<group>"; };
 		F718C3F51B16F4740038F851 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		F718C3F71B1728EB0038F851 /* MPWLogInViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPWLogInViewController.h; sourceTree = "<group>"; };
+		F718C3F81B1728EB0038F851 /* MPWLogInViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPWLogInViewController.m; sourceTree = "<group>"; };
+		F718C3FA1B1729C60038F851 /* MPWSignUpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPWSignUpViewController.h; sourceTree = "<group>"; };
+		F718C3FB1B1729C60038F851 /* MPWSignUpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPWSignUpViewController.m; sourceTree = "<group>"; };
 		F76964601B14950000C28E4D /* CountDownPickerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CountDownPickerViewController.h; sourceTree = "<group>"; };
 		F76964611B14950000C28E4D /* CountDownPickerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CountDownPickerViewController.m; sourceTree = "<group>"; };
 		F79942FA1B0EC0F300161E77 /* MeetingTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeetingTableViewController.h; sourceTree = "<group>"; };
@@ -1010,6 +1016,10 @@
 				F79AB2F21B0DCAD70042CAF0 /* MPWGlobal.m */,
 				F79C0DEE1B11919C00791CC1 /* MPWRecorder.h */,
 				F79C0DEF1B11919C00791CC1 /* MPWRecorder.m */,
+				F718C3F71B1728EB0038F851 /* MPWLogInViewController.h */,
+				F718C3F81B1728EB0038F851 /* MPWLogInViewController.m */,
+				F718C3FA1B1729C60038F851 /* MPWSignUpViewController.h */,
+				F718C3FB1B1729C60038F851 /* MPWSignUpViewController.m */,
 				F7A36C961B09B87E00C57DA6 /* AppDelegate.h */,
 				F7A36C971B09B87E00C57DA6 /* AppDelegate.m */,
 				F79AB3D11B0F26BE0042CAF0 /* RootTableViewController.h */,
@@ -1237,6 +1247,7 @@
 				F79942FC1B0EC0F300161E77 /* MeetingTableViewController.m in Sources */,
 				F718C3C11B16C5230038F851 /* MDAPIManager+Group.m in Sources */,
 				F79AB3641B0DE3AB0042CAF0 /* UIProgressView+AFNetworking.m in Sources */,
+				F718C3F91B1728EB0038F851 /* MPWLogInViewController.m in Sources */,
 				F718C3D61B16C5230038F851 /* UARoundedRectView.m in Sources */,
 				F79C0DBB1B10680500791CC1 /* TextEditingController.m in Sources */,
 				F718C3DC1B16C5230038F851 /* MDCompany.m in Sources */,
@@ -1282,6 +1293,7 @@
 				F79AB32F1B0DE3680042CAF0 /* MRWeakProxy.m in Sources */,
 				F79AB35E1B0DE3AB0042CAF0 /* AFURLSessionManager.m in Sources */,
 				F7A36CE51B09BE8800C57DA6 /* EmptyViewController.m in Sources */,
+				F718C3FC1B1729C60038F851 /* MPWSignUpViewController.m in Sources */,
 				F79C0DE01B10C3A900791CC1 /* SDImageCache.m in Sources */,
 				F79AB3571B0DE3AB0042CAF0 /* AFHTTPRequestOperationManager.m in Sources */,
 				F718C3CB1B16C5230038F851 /* UIView+JMNoise.m in Sources */,
