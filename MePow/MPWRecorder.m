@@ -71,10 +71,11 @@
 - (void)updateMeters {
     [super updateMeters];
     
+    self.recordLength += WAVE_UPDATE_FREQUENCY;
+    
     float avgPower = [self averagePowerForChannel:0];
     NSLog(@"%.2f", avgPower);
     self.pv.progress = (avgPower + 160)/160.0;
-    self.recordLength += WAVE_UPDATE_FREQUENCY;
     
     [self.label setText:[NSString stringWithFormat:@"Recording %.2f", self.recordLength]];
 }

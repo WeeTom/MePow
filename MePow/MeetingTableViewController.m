@@ -463,8 +463,8 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
                 pv.hidden = YES;
                 if (cacheType == SDImageCacheTypeNone) {
                     NSString *realName = [[file.name componentsSeparatedByString:@"-"] lastObject];
-                    NSString *path = [[[MPWGlobal imagePathForMeeting:weakSelf.meeting] stringByAppendingPathComponent:realName] stringByAppendingPathExtension:@"png"];
-                    NSData *imageData = UIImagePNGRepresentation(image);
+                    NSString *path = [[[MPWGlobal imagePathForMeeting:weakSelf.meeting] stringByAppendingPathComponent:realName] stringByAppendingPathExtension:@"jpg"];
+                    NSData *imageData = UIImageJPEGRepresentation(image, 1);
                     [imageData writeToFile:path atomically:YES];
                 }
             }];
@@ -542,7 +542,9 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     UIImage *image = info[UIImagePickerControllerOriginalImage];
     if (!info[UIImagePickerControllerReferenceURL]) {
         [[[ALAssetsLibrary alloc] init] writeImageToSavedPhotosAlbum:image.CGImage metadata:nil completionBlock:^(NSURL *assetURL, NSError *error) {
-            [self saveImage:image];
+            [self dismissViewControllerAnimated:YES completion:^{
+                [self saveImage:image];
+            }];
         }];
     } else {
         [self dismissViewControllerAnimated:YES completion:^{
@@ -573,21 +575,30 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 
 - (void)saveImageForNote:(PFObject *)note image:(UIImage *)image
 {
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat: @"yyyy_MM_dd_HH_mm_ss_SSS"];
-    NSString *timeDesc = [formatter stringFromDate:[NSDate date]];
-    NSString *path = [[[MPWGlobal imagePathForMeeting:self.meeting] stringByAppendingPathComponent:timeDesc] stringByAppendingPathExtension:@"png"];
-    NSData *imageData = UIImagePNGRepresentation(image);
-    [imageData writeToFile:path atomically:YES];
-    PFFile *originalFile = note[@"image"];
-    if (originalFile) {
-        [[MPWGlobal sharedInstance].uploadingFiles removeObject:originalFile];
-    }
+    UIImage *initialImage = image;
+    initialImage = [UIImage imageWithCGImage:initialImage.CGImage
+                                       scale:initialImage.scale
+                                 orientation:initialImage.imageOrientation];
     float rate = 0.5;
+
+    NSData *imageData = UIImageJPEGRepresentation((image), rate);
     while (imageData.length > 10485760) {
         imageData = [[NSData alloc] initWithData:UIImageJPEGRepresentation((image), rate)];
         rate = rate/2;
     }
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat: @"yyyy_MM_dd_HH_mm_ss_SSS"];
+    NSString *timeDesc = [formatter stringFromDate:[NSDate date]];
+    NSString *path = [[[MPWGlobal imagePathForMeeting:self.meeting] stringByAppendingPathComponent:timeDesc] stringByAppendingPathExtension:@"jpg"];
+    [imageData writeToFile:path atomically:YES];
+    
+    PFFile *originalFile = note[@"image"];
+    if (originalFile) {
+        [originalFile cancel];
+        [[MPWGlobal sharedInstance].uploadingFiles removeObject:originalFile];
+    }
+
     PFFile *imageFile = [PFFile fileWithName:timeDesc data:imageData];
     [[MPWGlobal sharedInstance].uploadingFiles addObject:imageFile];
     note[@"localURL"] = path;
@@ -704,6 +715,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
             self.recordingPV.hidden = YES;
             MPWRecorder *recorder = [MPWGlobal sharedInstance].recorder;
             [recorder stop];
+            [self resetToolBarItems];
         } else {
             return;
         }
@@ -716,6 +728,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         recorder.delegate = self;
         [recorder record];
         [MPWGlobal sharedInstance].recorder = recorder;
+        [self resetToolBarItems];
     }
 }
 
@@ -738,6 +751,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         HHActionSheet *as = [[HHActionSheet alloc] initWithTitle:@"Choose a source"];
         [as addButtonWithTitle:@"Camera" block:showCamera];
         [as addButtonWithTitle:@"Photo Library" block:showLibary];
+        [as addCancelButtonWithTitle:@"Cancel"];
         [as showInView:self.view];
     } else {
         showLibary();
@@ -840,6 +854,23 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     self.stopBtn.enabled = NO;
 }
 
+- (void)stopPlayingNote
+{
+    if (self.playingNote) {
+        NSIndexPath *playingIP = [NSIndexPath indexPathForRow:[self.notes indexOfObject:self.playingNote] inSection:0];
+        UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:playingIP];
+        
+        UIProgressView *pv = (UIProgressView *)[cell viewWithTag:3];
+        pv.progress = 0;
+        pv.hidden = YES;
+        MDBlockButton *btn = (MDBlockButton *)[cell viewWithTag:4];
+        btn.selected = NO;
+        [self.player stop];
+        self.playingNote = nil;
+        self.player = nil;
+    }
+}
+
 - (void)playVoiceForNote:(PFObject *)note
 {
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
@@ -851,22 +882,13 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 
     if (self.playingNote) {
         NSIndexPath *playingIP = [NSIndexPath indexPathForRow:[self.notes indexOfObject:self.playingNote] inSection:0];
-        UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:playingIP];
-
-        UIProgressView *pv = (UIProgressView *)[cell viewWithTag:3];
-        pv.progress = 0;
-        pv.hidden = YES;
-        MDBlockButton *btn = (MDBlockButton *)[cell viewWithTag:4];
-        btn.selected = NO;
-        [self.player stop];
         
+        [self stopPlayingNote];
         if ([playingIP isEqual:ip]) {
             self.playingNote = nil;
             self.player = nil;
             return;
         }
-        self.playingNote = nil;
-        self.player = nil;
     }
     
     PFFile *record = note[@"record"];
@@ -944,6 +966,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 }
 
 - (IBAction)exportBtnPressed:(id)sender {
+    [self stopPlayingNote];
     if (self.notes.count == 0) {
         // todo show error
         return;
@@ -1017,7 +1040,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 - (void)audioRecorderDidFinishRecording:(MPWRecorder *)recorder successfully:(BOOL)flag
 {
     if (recorder.recordLength < 1) {
-        MRProgressOverlayView *progressView = [MRProgressOverlayView showOverlayAddedTo:self.view animated:YES];
+        MRProgressOverlayView *progressView = [MRProgressOverlayView showOverlayAddedTo:self.navigationController.view animated:YES];
         progressView.mode = MRProgressOverlayViewModeCross;
         progressView.titleLabelText = @"Record at least 1 sec!";
         [progressView performSelector:@selector(dismiss:) withObject:@YES afterDelay:1];
