@@ -19,7 +19,7 @@
 {
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
     NSError *err = nil;
-    [audioSession setCategory :AVAudioSessionCategoryPlayAndRecord error:&err];
+    [audioSession setCategory:AVAudioSessionCategoryRecord error:&err];
     [audioSession setActive:YES error:&err];
     BOOL audioHWAvailable = audioSession.inputAvailable;
     if (! audioHWAvailable) {

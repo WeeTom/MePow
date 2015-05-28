@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>MingdaoRedirectURL</key>
+	<string>http://www.mingdao.com</string>
+	<key>MingdaoSecret</key>
+	<string>EAB433F7A97771AD67E3C67C502D33</string>
+	<key>MingdaoKey</key>
+	<string>B8AEBC1EFF17</string>
 	<key>ParseClientKey</key>
 	<string>sgx6MxWc0PwXVpzZ6iQfc6FpuFgjYWCuEsiYs18A</string>
 	<key>ParseAppID</key>

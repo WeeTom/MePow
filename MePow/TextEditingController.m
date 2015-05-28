@@ -29,6 +29,12 @@
 
     self.images = [NSMutableArray array];
     self.records = [NSMutableArray array];
+    
+    NSArray *users = self.meeting[@"users"];
+    if (users.count > 0) {
+        UIMenuController *menu = [UIMenuController sharedMenuController];
+        menu.menuItems = @[[[UIMenuItem alloc] initWithTitle:@"@User" action:@selector(addUser:)]];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -201,6 +207,20 @@
 - (void)textViewDidChange:(UITextView *)textView
 {
     [self resetMultiDataView];
+}
+
+- (void)addUser:(UIMenuController *)sender
+{
+    NSArray *users = self.meeting[@"users"];
+    HHActionSheet *as = [[HHActionSheet alloc] initWithTitle:@"Choose"];
+    for (NSDictionary *user in users) {
+        NSString *name = user[@"MingdaoUserName"];
+        [as addButtonWithTitle:name block:^{
+            [self.textView insertText:[NSString stringWithFormat:@"@%@ ", name]];
+        }];
+    }
+    [as addCancelButtonWithTitle:@"Cancel"];
+    [as showInView:self.view];
 }
 
 #pragma mark - Notifications

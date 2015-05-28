@@ -11,12 +11,15 @@
 #import "NSString+HHKit.h"
 #import "MRProgress.h"
 #import "MeetingTableViewController.h"
+#import "MDAPICategory.h"
+#import "UserListVC.h"
 
 NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCreateTableViewControllerDidFinishCreatingMeeting";
 
-@interface MeetingCreateTableViewController () <UITextFieldDelegate>
+@interface MeetingCreateTableViewController () <UITextFieldDelegate, UserListVCDelegate>
 @property (assign, nonatomic) int viewAppearTime;
-//@property (assign, nonatomic) int duration;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *flexibleItem;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *connectItem;
 @property (strong, nonatomic) NSMutableArray *users;
 @property (strong, nonatomic) UITextField *name, *location;
 @property (strong, nonatomic) UIDatePicker *picker;
@@ -24,17 +27,27 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
 @end
 
 @implementation MeetingCreateTableViewController
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:MDAPIManagerNewTokenSetNotification object:nil];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(newTokenSet:) name:MDAPIManagerNewTokenSetNotification object:nil];
+
 //    self.duration = 1;
-    self.users = [@[@"A", @"B"] mutableCopy];
+    self.users = [NSMutableArray array];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    if ([MDAPIManager sharedManager].accessToken.length <= 0) {
+        [self setToolbarItems:@[self.flexibleItem, self.connectItem] animated:YES];
+    } else {
+        [self setToolbarItems:@[self.flexibleItem] animated:YES];
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -48,18 +61,15 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    // Return the number of sections.
-    return 3;
+    return 2 + 1*([MDAPIManager sharedManager].accessToken.length > 0);
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    // Return the number of rows in the section.
     switch (section) {
         case 0:
             return 1;
@@ -112,6 +122,22 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
     return nil;
 }
 
+- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+    switch (section) {
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            return @"This will create an EVENT on Mingdao";
+            break;
+        default:
+            break;
+    }
+    return nil;
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = nil;
     switch (indexPath.section) {
@@ -151,23 +177,6 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
                     self.picker = picker;
                 }
                     break;
-                case 3:
-                {
-//                    cell = [tableView dequeueReusableCellWithIdentifier:@"StepperCell" forIndexPath:indexPath];
-//                    UILabel *title = (UILabel *)[cell viewWithTag:1];
-//                    title.text = @"Duration";
-//                    UILabel *duration = (UILabel *)[cell viewWithTag:2];
-//                    UIStepper *stepper = (UIStepper *)[cell viewWithTag:3];
-//                    stepper.minimumValue = 1;
-//                    stepper.value = self.duration;
-//                    self.stepper = stepper;
-//                    if (self.duration > 1) {
-//                        duration.text = [NSString stringWithFormat:@"%d hours", self.duration];
-//                    } else {
-//                        duration.text = [NSString stringWithFormat:@"%d hour", self.duration];
-//                    }
-                }
-                    break;
                 default:
                     break;
             }
@@ -178,11 +187,12 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
                 UILabel *label = (UILabel *)[cell viewWithTag:2];
                 label.text = @"Add";
             } else {
+                MDUser *user = self.users[indexPath.row];
                 cell = [tableView dequeueReusableCellWithIdentifier:@"ImageLabelCell" forIndexPath:indexPath];
                 UIImageView *imageView = (UIImageView *)[cell viewWithTag:1];
-                [imageView setImageWithURL:[NSURL URLWithString:@"http://tp3.sinaimg.cn/1657938842/180/5704612869/1"] placeholderImage:nil];
+                [imageView setImageWithURL:[NSURL URLWithString:user.avatar] placeholderImage:[UIImage imageNamed:@"defaultLoadingImage"]];
                 UILabel *label = (UILabel *)[cell viewWithTag:2];
-                label.text = @"Somebody";
+                label.text = user.objectName;
             }
             
             break;
@@ -216,16 +226,20 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
             }
             break;
         case 2:
+        {
+            UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+            UINavigationController *nav = [sb instantiateViewControllerWithIdentifier:@"PickUser"];
+            UserListVC *vc = nav.viewControllers.firstObject;
+            vc.delegate = self;
+            vc.selectedUsers = self.users;
+            [self presentViewController:nav animated:YES completion:^{
+                
+            }];
+        }
             break;
         default:
             break;
     }
-}
-
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
-{
-    [self.name resignFirstResponder];
-    [self.location resignFirstResponder];
 }
 
 - (IBAction)dateChanged:(id)sender {
@@ -263,34 +277,80 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
     }
     meeting[@"createTime"] = [NSDate date];
     meeting[@"begin"] = self.picker.date;
-//    meeting[@"duration"] = @(self.duration);
-    [meeting pin];
-    [meeting saveEventually];
-    [[NSNotificationCenter defaultCenter] postNotificationName:MeetingCreateTableViewControllerDidFinishCreatingMeeting object:meeting];
-    UINavigationController *nav = self.navigationController;
-    [nav popViewControllerAnimated:YES];
-    NSComparisonResult result = [[NSDate date] compare:self.picker.date];
-    if (result == NSOrderedAscending) {
-        result = [[NSDate date] compare:[self.picker.date dateByAddingTimeInterval:-60*15]];
+    
+    
+    dispatch_block_t startMeeting = ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:MeetingCreateTableViewControllerDidFinishCreatingMeeting object:meeting];
+        UINavigationController *nav = self.navigationController;
+        [nav popViewControllerAnimated:YES];
+        NSComparisonResult result = [[NSDate date] compare:self.picker.date];
         if (result == NSOrderedAscending) {
-            [MPWGlobal scheduleNotificationForMeeting:meeting type:0];
+            result = [[NSDate date] compare:[self.picker.date dateByAddingTimeInterval:-60*15]];
+            if (result == NSOrderedAscending) {
+                [MPWGlobal scheduleNotificationForMeeting:meeting type:0];
+            }
+            else {
+                HHAlertView *alert = [[HHAlertView alloc] initWithTitle:@"Hey!" message:[NSString stringWithFormat:@"%@ will begun soon! please get your self prepared!", self.name.text] cancelButtonTitle:@"Sure" cancelBlock:^{
+                    MeetingTableViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"MeetingDetail"];
+                    vc.meeting = meeting;
+                    [nav pushViewController:vc animated:YES];
+                }];
+                [alert show];
+            }
         }
         else {
-            HHAlertView *alert = [[HHAlertView alloc] initWithTitle:@"Hey!" message:[NSString stringWithFormat:@"%@ will begun soon! please get your self prepared!", self.name.text] cancelButtonTitle:@"Sure" cancelBlock:^{
+            HHAlertView *alert = [[HHAlertView alloc] initWithTitle:@"Hey!" message:[NSString stringWithFormat:@"%@ has begun! please get your self prepared!", self.name.text] cancelButtonTitle:@"Sure" cancelBlock:^{
                 MeetingTableViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"MeetingDetail"];
                 vc.meeting = meeting;
                 [nav pushViewController:vc animated:YES];
             }];
             [alert show];
         }
-    }
-    else {
-        HHAlertView *alert = [[HHAlertView alloc] initWithTitle:@"Hey!" message:[NSString stringWithFormat:@"%@ has begun! please get your self prepared!", self.name.text] cancelButtonTitle:@"Sure" cancelBlock:^{
-            MeetingTableViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"MeetingDetail"];
-            vc.meeting = meeting;
-            [nav pushViewController:vc animated:YES];
-        }];
-        [alert show];
+    };
+    NSMutableArray *userIDs = [NSMutableArray array];
+    if (self.users.count > 0) {
+        NSMutableArray *users = [NSMutableArray array];
+        
+        NSMutableDictionary *mDic = [NSMutableDictionary dictionary];
+        [mDic setObject:[[PFUser currentUser] objectForKey:@"MingdaoUserID"] forKey:@"MingdaoUserID"];
+        [mDic setObject:[[PFUser currentUser] objectForKey:@"MingdaoUserName"] forKey:@"MingdaoUserName"];
+        [mDic setObject:[[PFUser currentUser] objectForKey:@"MingdaoUserAvatar"] forKey:@"MingdaoUserAvatar"];
+        NSString *projectID = [[PFUser currentUser] objectForKey:@"MingdaoUserProjectID"];
+        [users addObject:mDic];
+        [userIDs addObject:[[PFUser currentUser] objectForKey:@"MingdaoUserID"]];
+        
+        for (MDUser *user in self.users) {
+            NSMutableDictionary *mDic = [NSMutableDictionary dictionary];
+            [mDic setObject:user.objectID forKey:@"MingdaoUserID"];
+            [mDic setObject:user.objectName forKey:@"MingdaoUserName"];
+            [mDic setObject:user.avatar forKey:@"MingdaoUserAvatar"];
+            [mDic setObject:projectID forKey:@"MingdaoUserProjectID"];
+            [users addObject:mDic];
+            [userIDs addObject:user.objectID];
+        }
+        meeting[@"users"] = users;
+        NSDateFormatter *fm = [[NSDateFormatter alloc] init];
+        [fm setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+        
+        MRProgressOverlayView *progressView = [MRProgressOverlayView showOverlayAddedTo:self.view animated:YES];
+        [progressView show:YES];
+        [[[MDAPIManager sharedManager] createEventWithEventName:self.name.text startDateString:[fm stringFromDate:self.picker.date] endDateString:[fm stringFromDate:[self.picker.date dateByAddingTimeInterval:60*60]] remindType:0 remindTime:0 categoryID:0 isAllDay:NO address:self.location.text description:@"Created via MePow" isPrivate:NO userIDs:userIDs emails:nil isRecur:NO frequency:0 interval:0 weekDays:nil recurCount:0 untilDate:nil handler:^(NSString *string, NSError *error) {
+            if (error) {
+                progressView.mode = MRProgressOverlayViewModeCross;
+                progressView.titleLabelText = error.userInfo[NSLocalizedDescriptionKey];
+                [progressView performSelector:@selector(dismiss:) withObject:@YES afterDelay:2];
+
+                return ;
+            }
+            [progressView hide:YES];
+            [meeting pin];
+            [meeting saveEventually];
+            startMeeting();
+        }] start];
+    } else {
+        startMeeting();
+        [meeting pin];
+        [meeting saveEventually];
     }
 }
 
@@ -299,48 +359,20 @@ NSString *MeetingCreateTableViewControllerDidFinishCreatingMeeting = @"MeetingCr
     [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:3 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
+#pragma mark -
+#pragma mark - Notification
+- (void)newTokenSet:(NSNotification *)notification
+{
+    NSString *token = notification.object;
+    if (token.length <= 0) {
+        return;
+    }
+    [self.tableView reloadData];
 }
-*/
 
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+- (void)userListVC:(UserListVC *)viewController didFinishWithResult:(NSArray *)users
+{
+    self.users = [users mutableCopy];
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationAutomatic];
 }
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
-
 @end

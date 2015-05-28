@@ -153,8 +153,6 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.navigationController.toolbar.translucent = NO;
-    [self.navigationController setToolbarHidden:NO animated:YES];
     [self resetToolBarItems];
 
     if (!self.audioSessionPermitted) {
@@ -208,17 +206,6 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 
 }
 
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-    [self.navigationController setToolbarHidden:YES animated:NO];
-    [super viewWillDisappear:animated];
-}
-
 - (void)resetToolBarItems
 {
     NSMutableArray *items = [NSMutableArray array];
@@ -269,7 +256,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
                         int type = [object[@"type"] intValue];
                         switch (type) {
                             case 0:
-                                [ms appendFormat:@"%d.%@\n\n", order++, object[@"content"]];
+                                [ms appendFormat:@"%d.%@\n", order++, object[@"content"]];
                                 break;
                             case 1:{
                                 PFFile *reocrd = object[@"record"];
@@ -400,8 +387,12 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     } else if (type == 1) {
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"NoteVoiceCell" forIndexPath:indexPath];
         
+        NSNumber *length = note[@"recordLength"];
         UILabel *label = (UILabel *)[cell viewWithTag:1];
         label.text = @"Voice";
+        if ([length floatValue] > 0) {
+            label.text = [NSString stringWithFormat:@"Voice %.2fs", [length floatValue]];
+        }
         
         UILabel *label2 = (UILabel *)[cell viewWithTag:2];
         label2.text = [fm stringFromDate:note[@"createTime"]];
@@ -676,6 +667,8 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         [self performSelectorOnMainThread:@selector(reloadTableViewWithItems:) withObject:items waitUntilDone:NO];
         return;
     }
+    
+    [self.refreshControl endRefreshing];
     self.notes = [NSMutableArray array];
     [self.notes addObjectsFromArray:items];
     if (self.notes.count == 0) {
@@ -694,6 +687,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         [MPWGlobal cancelNotificationForMeeting:self.meeting type:1];
         [self.meeting unpin];
         [self.meeting deleteEventually];
+        [self stopTimer];
         [[NSNotificationCenter defaultCenter] postNotificationName:MeetingTableViewControllerDidDeleteMeeting object:self.meeting];
         [self.navigationController popViewControllerAnimated:YES];
     }];
@@ -839,6 +833,8 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         self.startPauseBtn.selected = YES;
     }
     
+    self.countDownLabel.text = @"00:00:00";
+    self.countDownLabel.textColor = [UIColor blackColor];
 
     self.startPauseBtn.selected = NO;
     self.stopBtn.enabled = NO;
@@ -846,6 +842,11 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
 
 - (void)playVoiceForNote:(PFObject *)note
 {
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    NSError *err = nil;
+    [audioSession setCategory:AVAudioSessionCategoryPlayback error:&err];
+    [audioSession setActive:YES error:&err];
+    
     NSIndexPath *ip = [NSIndexPath indexPathForRow:[self.notes indexOfObject:note] inSection:0];
 
     if (self.playingNote) {
@@ -977,18 +978,52 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     }];
 }
 
+- (IBAction)reloadData:(UIRefreshControl *)sender {
+    __weak __block typeof(self) weakSelf = self;
+    PFQuery *query = [PFQuery queryWithClassName:@"Note"];
+    [query whereKey:@"meeting" equalTo:self.meeting];
+    [query orderByAscending:@"createTime"];
+    [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
+        if (task.error) {
+            NSLog(@"Error: %@", task.error);
+            return task;
+        }
+        
+        for (PFObject *object in (NSArray *)task.result) {
+            BOOL isLocal = object[@"local"];
+            PFFile *file = object[@"image"];
+            if (isLocal && ![[MPWGlobal sharedInstance].uploadingFiles containsObject:file]) {
+                object[@"percentDone"] = @0;
+                object[@"failed"] = @YES;
+            }
+            [object pin];
+        }
+        [weakSelf reloadTableViewWithItems:task.result];
+        return task;
+    }];
+}
+
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([segue.identifier isEqualToString:@"TextEdit"]) {
         UINavigationController *nc = segue.destinationViewController;
         TextEditingController *vc = nc.viewControllers.firstObject;
+        vc.meeting = self.meeting;
         vc.delegate = self;
     }
 }
 
 #pragma mark - Audio
-- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag
+- (void)audioRecorderDidFinishRecording:(MPWRecorder *)recorder successfully:(BOOL)flag
 {
+    if (recorder.recordLength < 1) {
+        MRProgressOverlayView *progressView = [MRProgressOverlayView showOverlayAddedTo:self.view animated:YES];
+        progressView.mode = MRProgressOverlayViewModeCross;
+        progressView.titleLabelText = @"Record at least 1 sec!";
+        [progressView performSelector:@selector(dismiss:) withObject:@YES afterDelay:1];
+        return;
+    }
+    
     PFObject *note = [PFObject objectWithClassName:@"Note"];
     note[@"local"] = @YES;
     note[@"type"] = @1;
@@ -996,6 +1031,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
     note[@"meeting"] = self.meeting;
     note[@"createTime"] = [NSDate date];
     note[@"percentDone"] = @(0);
+    note[@"recordLength"] = @(recorder.recordLength);
     [note pin];
     
     [self saveRecordForNote:note recordPath:recorder.url.path];
@@ -1037,6 +1073,7 @@ NSString *MeetingTableViewControllerRecordDownloadPercentChanged = @"MeetingTabl
         saveNote[@"creator"] = [PFUser currentUser];
         saveNote[@"meeting"] = note[@"meeting"];
         saveNote[@"createTime"] = note[@"createTime"];
+        saveNote[@"recordLength"] = note[@"recordLength"];
         [saveNote pin];
         [saveNote saveEventually];
         [note unpin];

@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 #import "MeetingTableViewController.h"
+#import "MDAuthenticator.h"
+#import "MDAPICategory.h"
 
 @interface AppDelegate ()
 
@@ -50,6 +52,28 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
+{
+    NSDictionary *result = [MDAuthenticator mingdaoAppDidFinishAuthenticationWithURL:url];
+    if (result) {
+        NSLog(@"%@", result);
+        NSString *errorStirng= result[MDAuthErrorKey];
+        if (errorStirng) {
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Failed!" message:errorStirng delegate:nil cancelButtonTitle:@"Done" otherButtonTitles:nil];
+            [alertView show];
+            return YES;
+        }
+        
+        NSString *accessToken = result[MDAuthAccessTokenKey];
+        //    NSString *refeshToken = result[MDAuthRefreshTokenKey];
+        //    NSString *expireTime = result[MDAuthExpiresTimeKeyl];
+        [MDAPIManager sharedManager].accessToken = accessToken;
+        [[PFUser currentUser] setObject:accessToken forKey:@"Mingdao"];
+        [[PFUser currentUser] saveEventually];
+    }
+    return YES;
 }
 
 #pragma mark - Notification

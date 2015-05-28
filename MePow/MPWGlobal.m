@@ -138,7 +138,7 @@ static MPWGlobal *sharedInstance = nil;
 {
     NSArray *notifications = [[UIApplication sharedApplication] scheduledLocalNotifications];
     for (UILocalNotification *noti in notifications) {
-        if ([noti.userInfo[@"meetingiD"] isEqualToString:meeting.objectId] &&
+        if ([noti.userInfo[@"meetingID"] isEqualToString:meeting.objectId] &&
             [noti.userInfo[@"type"] intValue] == startOrEnd) {
             [[UIApplication sharedApplication] cancelLocalNotification:noti];
             break;

@@ -12,6 +12,7 @@
 #import "MeetingTableViewController.h"
 #import "MeetingCreateTableViewController.h"
 #import "SummaryTableViewController.h"
+#import "MDAPICategory.h"
 
 @interface RootTableViewController () <PFLogInViewControllerDelegate>
 @property (strong, nonatomic) NSMutableArray *meetings;
@@ -31,8 +32,6 @@
     [super viewDidLoad];
     self.shouldReload = YES;
     
-    self.tableView.estimatedRowHeight = 44;
-    self.tableView.rowHeight = UITableViewAutomaticDimension;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(meetingDeleted:) name:MeetingTableViewControllerDidDeleteMeeting object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(meetingCreated:) name:MeetingCreateTableViewControllerDidFinishCreatingMeeting object:nil];
 }
@@ -47,6 +46,11 @@
         logInController.delegate = self;
         [self presentViewController:logInController animated:YES completion:nil];
         self.shouldReload = NO;
+    } else {
+        NSString *token = user[@"Mingdao"];
+        if (token.length > 0 && ![MDAPIManager sharedManager].accessToken) {
+            [MDAPIManager sharedManager].accessToken = token;
+        }
     }
     
     if (self.shouldReload) {
@@ -70,6 +74,9 @@
             [self reloadTableViewWithItems:task.result];
             return task;
         }];
+    }
+    else {
+        [self.tableView reloadData];
     }
 }
 
@@ -240,9 +247,14 @@
     [query whereKey:@"creator" equalTo:user];
     [query orderByDescending:@"begin"];
     [[query findObjectsInBackground] continueWithBlock:^id(BFTask *task) {
+        if ([sender isKindOfClass:[UIRefreshControl class]]) {
+            [(UIRefreshControl *)sender endRefreshing];
+        }
+        
         if (task.error) {
-            NSLog(@"Error: %@", task.error);
-            [progressView performSelectorOnMainThread:@selector(dismiss:) withObject:@YES waitUntilDone:NO];
+            progressView.mode = MRProgressOverlayViewModeCross;
+            progressView.titleLabelText = task.error.userInfo[NSLocalizedDescriptionKey];
+            [progressView performSelector:@selector(dismiss:) withObject:@YES afterDelay:2];
             return task;
         }
         

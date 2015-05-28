@@ -14,6 +14,6 @@
 @end
 
 @interface TextEditingController : UIViewController
-@property (strong, nonatomic) PFObject *summary;
+@property (strong, nonatomic) PFObject *summary, *meeting;
 @property (weak, nonatomic) id<TextEditingControllerDelegate> delegate;
 @end
