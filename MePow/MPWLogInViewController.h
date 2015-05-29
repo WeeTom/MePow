@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MPWLogInViewController : PFLogInViewController
+@interface MPWLogInViewController : PFLogInViewController <PFSignUpViewControllerDelegate>
 
 @end

@@ -303,7 +303,7 @@ NSString *SummaryTableViewControllerRecordDownloadPercentChanged = @"SummaryTabl
         if (self.images.count > 0) {
             [ms appendFormat:@"\nPHOTOS\n"];
             for (int i = 0; i < self.images.count; i++) {
-                PFFile *file = self.records[i];
+                PFFile *file = self.images[i];
                 [ms appendFormat:@"%d. %@\n", i+1, file.url];
             }
         }
